@@ -289,9 +289,11 @@ tfoot td{font-weight:700;background:var(--soft)}
   function weekStart(s){ const t = toDate(s); t.setDate(t.getDate() - (t.getDay()+6)%7); return ymd(t); }
   function isoWeek(ws){ const thu = toDate(ws); thu.setDate(thu.getDate()+3); const jan4 = new Date(thu.getFullYear(),0,4); return 1 + Math.round(((thu - jan4)/864e5 - 3 + (jan4.getDay()+6)%7)/7); }
   const md = s => s.slice(5).replace('-','.');
+  // 월 주차: 월~일 한 주를 그 주 목요일이 속한 달의 N주차로 셈 (예: 11/02~11/08 → 11월 1주차)
+  function monthWeek(ws){ const thu = toDate(ws); thu.setDate(thu.getDate()+3); return `${thu.getMonth()+1}월 ${Math.ceil(thu.getDate()/7)}주차`; }
   function periodKey(r){ return r.date ? (F.mode === 'week' ? weekStart(r.date) : r.date) : ''; }
   function periodLabel(k){
-    if (F.mode === 'week'){ const e = toDate(k); e.setDate(e.getDate()+6); return {main:`${isoWeek(k)}주차`, sub:`${md(k)}~${md(ymd(e))}`}; }
+    if (F.mode === 'week'){ const e = toDate(k); e.setDate(e.getDate()+6); return {main:monthWeek(k), sub:`${md(k)}~${md(ymd(e))}`}; }
     return {main:`${md(k)} (${DOW[toDate(k).getDay()]})`, sub:''};
   }
 
@@ -309,8 +311,9 @@ tfoot td{font-weight:700;background:var(--soft)}
     if (F.mode === 'all'){ $('chips').innerHTML = ''; return; }
     const g = {};
     base().forEach(r => { const k = periodKey(r); if (!k) return; (g[k] ||= {n:0,qty:0,def:0}); g[k].n++; g[k].qty += n(r.qty); g[k].def += n(r.defects); });
-    const keys = Object.keys(g).sort().reverse();
-    if (!keys.includes(F.key)) F.key = keys[0] || '';
+    const keys = Object.keys(g).sort();
+    if (F.mode === 'day') keys.reverse();   // 일자: 최신순 / 주차: 1주차, 2주차 … 순
+    if (!keys.includes(F.key)) F.key = keys.length ? keys.slice().sort().pop() : '';
     $('chips').innerHTML = keys.map(k => { const L = periodLabel(k), rt = pct(g[k].def, g[k].qty);
       return `<button type="button" class="chip" data-key="${k}" aria-pressed="${k===F.key}"><span class="cl num">${L.main}</span>${L.sub?`<span class="cs num">${L.sub}</span>`:''}<span class="cs num"><span class="dot ${level(rt)}"></span>${g[k].n}건 · ${fmtPct(rt)}</span></button>`; }).join('');
     const sel = $('chips').querySelector('[aria-pressed="true"]'); if (sel) sel.scrollIntoView({block:'nearest', inline:'nearest'});
