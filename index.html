@@ -4,11 +4,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: 현장 점검표 감성 — 상단 요약 숫자, 그 아래 원인 분석 3패널, 맨 아래 원장(ledger) 표와 입력 폼 */
+/* Layout: 필터 → 수량·금액 요약 → 재사용/폐기 그래프 2개 → 원인 분석 3패널 → 기간 선택이 붙은 검사 기록 표 */
 :root{
   --bg:#f3f4f2; --panel:#ffffff; --ink:#1d2326; --muted:#5f696e; --line:#d9ddda; --soft:#eceeeb;
   --accent:#1f5f8b; --accent-ink:#ffffff; --accent-soft:#dce9f2;
   --ok:#2f7d4f; --ok-soft:#dcefe3; --warn:#a86a00; --warn-soft:#f7ead0; --crit:#b3372f; --crit-soft:#f6dcd9;
+  --reuse:#2f7fb3; --scrap:#c2553f;
   --t-top:#1f5f8b; --t-bottom:#5aa0c8; --t-both:#8a6fb5; --t-other:#c48a3a; --t-none:#b9c0bc;
   --f-body:"IBM Plex Sans KR","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
@@ -17,73 +18,73 @@
   --bg:#141819; --panel:#1c2123; --ink:#e6eae8; --muted:#97a2a6; --line:#2e3638; --soft:#232a2c;
   --accent:#6fb0dc; --accent-ink:#0d1a22; --accent-soft:#1d3444;
   --ok:#6cc08d; --ok-soft:#1b3326; --warn:#e2ad4f; --warn-soft:#3a2f17; --crit:#ec7a70; --crit-soft:#3d2120;
+  --reuse:#62a9da; --scrap:#e5826c;
   --t-top:#6fb0dc; --t-bottom:#3d7ea5; --t-both:#a993d1; --t-other:#d7a258; --t-none:#4d5759;
   color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#141819; --panel:#1c2123; --ink:#e6eae8; --muted:#97a2a6; --line:#2e3638; --soft:#232a2c;
-  --accent:#6fb0dc; --accent-ink:#0d1a22; --accent-soft:#1d3444;
-  --ok:#6cc08d; --ok-soft:#1b3326; --warn:#e2ad4f; --warn-soft:#3a2f17; --crit:#ec7a70; --crit-soft:#3d2120;
-  --t-top:#6fb0dc; --t-bottom:#3d7ea5; --t-both:#a993d1; --t-other:#d7a258; --t-none:#4d5759;
-  color-scheme:dark}
 *{box-sizing:border-box}
-[hidden]{display:none!important} body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
-.wrap{max-width:1240px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:18px}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:12px}
-.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:500}
-h1{margin:2px 0 0;font-size:24px;font-weight:700;text-wrap:balance}
+h1{margin:0;font-size:24px;font-weight:700}
 h2{margin:0;font-size:15px;font-weight:600}
-.status{font-size:12px;color:var(--muted)}
-.num,.mono{font-variant-numeric:tabular-nums}
+.status,.note{font-size:12px;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
 .mono{font-family:var(--f-mono)}
 button,input,select{font:inherit;color:inherit}
 .btn{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:7px 12px;cursor:pointer;font-weight:500}
 .btn:hover{border-color:var(--muted)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .btn.danger{color:var(--crit);border-color:var(--crit)}
-.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn:focus-visible,input:focus-visible,select:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 
 .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .field{display:flex;flex-direction:column;gap:4px;min-width:0}
-.field label{font-size:12px;color:var(--muted);font-weight:500}
+.field label,.flabel{font-size:12px;color:var(--muted);font-weight:500}
 .field input,.field select{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:6px 8px;min-width:0}
-.filters .field input[type=search]{width:180px}
-.flabel{font-size:12px;color:var(--muted);font-weight:500}
+.filters input[type=search]{width:180px}
+
+/* 수량·금액 요약 */
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--line);background:var(--panel);border-radius:8px}
+.kpi{padding:14px 16px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi:first-child{border-left:0}
+.kpi .k{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.kpi .v{font-size:26px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .v small{font-size:14px;font-weight:600;margin-left:2px;color:var(--muted)}
+.kpi .s{font-size:12px;color:var(--muted)}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block;flex:none}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1.1fr 1fr 1.2fr;gap:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.phead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px}
+.panel .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.legend-inline{display:flex;gap:12px;font-size:12px;color:var(--muted);align-items:center}
+.legend-inline span{display:inline-flex;align-items:center;gap:5px}
+
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--panel)}
 .seg button{border:0;background:transparent;padding:6px 14px;cursor:pointer;font-weight:500;color:var(--muted)}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
-.chips:empty{display:none}
-.chip{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 12px;cursor:pointer;text-align:left;min-width:108px}
-.chip:hover{border-color:var(--muted)}
-.chip[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
-.chip .cl{font-weight:600;font-size:14px}
-.chip .cs{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)} .dot.crit{background:var(--crit)}
-.chip:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.col.dim{opacity:.35}
+.seg.sm button{padding:4px 10px;font-size:12px}
 
-.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border:1px solid var(--line);background:var(--panel);border-radius:8px}
-.kpi{padding:14px 16px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:2px;min-width:0}
-.kpi:first-child{border-left:0}
-.kpi .k{font-size:12px;color:var(--muted)}
-.kpi .v{font-size:26px;font-weight:700;line-height:1.2}
-.kpi .s{font-size:12px;color:var(--muted)}
-.kpi.hl .v{color:var(--accent)}
+/* 세로 막대 차트 (누적) */
+.chart{display:flex;flex-direction:column;gap:4px}
+.cols{display:flex;gap:6px;align-items:flex-end;height:170px;border-bottom:1px solid var(--line);padding-top:18px;overflow-x:auto}
+.col{flex:1 0 40px;max-width:72px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:2px}
+.col b{font-size:11px;font-weight:600;white-space:nowrap}
+.stackbar{width:62%;display:flex;flex-direction:column-reverse;min-height:2px}
+.stackbar i{display:block;width:100%}
+.stackbar i:last-child{border-radius:3px 3px 0 0}
+.col .one{display:block;width:62%;border-radius:3px 3px 0 0;min-height:2px}
+.collbl{display:flex;gap:6px;overflow-x:auto}
+.collbl span{flex:1 0 40px;max-width:72px;text-align:center;font-size:11px;color:var(--muted);line-height:1.3}
+.empty{color:var(--muted);font-size:13px;padding:10px 0}
 
-.grid3{display:grid;grid-template-columns:1.1fr 1fr 1.2fr;gap:14px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}
-.panel .sub{font-size:12px;color:var(--muted);margin-top:2px}
-
-/* type breakdown */
 .stack{display:flex;height:22px;border-radius:4px;overflow:hidden;background:var(--soft)}
 .stack span{display:block;height:100%}
 .legend{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px 10px;align-items:center;font-size:13px}
-.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
-
-/* code ranking */
 .rank{display:flex;flex-direction:column;gap:8px}
 .rrow{display:grid;grid-template-columns:minmax(0,9.5em) 1fr 4.2em;gap:8px;align-items:center;font-size:12.5px}
 .rrow .code{font-family:var(--f-mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -91,93 +92,100 @@ button,input,select{font:inherit;color:inherit}
 .bar i{position:absolute;inset:0 auto 0 0;border-radius:3px}
 .rrow .pct{text-align:right;font-weight:600}
 
-/* daily columns */
-.cols{display:flex;gap:6px;align-items:flex-end;height:150px;border-bottom:1px solid var(--line);position:relative;padding-top:14px;overflow-x:auto}
-.col{flex:1 0 34px;max-width:60px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:2px}
-.col b{font-size:11px;font-weight:600}
-.col i{display:block;width:70%;border-radius:3px 3px 0 0;background:var(--accent);min-height:2px}
-.collbl{display:flex;gap:6px;overflow-x:auto}
-.collbl span{flex:1 0 34px;max-width:60px;text-align:center;font-size:11px;color:var(--muted)}
-.empty{color:var(--muted);font-size:13px;padding:10px 0}
-
-/* table */
+/* 검사 기록 */
+.records{display:flex;flex-direction:column;gap:10px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center}
+.periodbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.periodbar .pick{display:flex;align-items:center;gap:6px}
+.periodbar .pick label{font-size:13px;color:var(--muted)}
+.periodbar select{border:1px solid var(--line);background:var(--soft);border-radius:6px;padding:6px 8px}
+.periodbar .divider{width:1px;height:22px;background:var(--line)}
+.periodbar .range{font-size:13px;color:var(--muted)}
+.periodbar .range b{color:var(--ink);font-weight:600}
 .tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
 table{border-collapse:collapse;width:100%;min-width:1060px;font-size:13px}
 th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
-thead th{background:var(--soft);font-size:12px;color:var(--muted);font-weight:600;position:sticky;top:0}
+thead th{background:var(--soft);font-size:12px;color:var(--muted);font-weight:600}
 thead tr.grp th{border-bottom:0;padding-bottom:0;text-align:center}
-td.r,th.r{text-align:right}
-td.c,th.c{text-align:center}
+td.r,th.r{text-align:right} td.c,th.c{text-align:center}
 tbody tr:hover td{background:var(--soft)}
-td.dim{color:var(--muted)}
+td.dim,.dim{color:var(--muted)}
 .pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:600}
-.pill.ok{background:var(--ok-soft);color:var(--ok)}
-.pill.warn{background:var(--warn-soft);color:var(--warn)}
-.pill.crit{background:var(--crit-soft);color:var(--crit)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.crit{background:var(--crit-soft);color:var(--crit)}
 .flag{color:var(--warn);font-size:12px;cursor:help}
 .rowact{display:flex;gap:6px}
 .rowact .btn{padding:3px 8px;font-size:12px}
 tfoot td{font-weight:700;background:var(--soft)}
 
-/* form */
+/* 입력 폼 · 단가 */
 .formpanel{border:1px solid var(--accent);background:var(--panel);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:14px}
 .fgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
 .fgrid .w2{grid-column:span 2}
-.fgroup{grid-column:1/-1;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em;border-top:1px dashed var(--line);padding-top:10px}
+.fgroup{grid-column:1/-1;font-size:12px;font-weight:600;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
 .formmsg{font-size:13px;min-height:1.2em}
 .formmsg.err{color:var(--crit)} .formmsg.warn{color:var(--warn)} .formmsg.ok{color:var(--ok)}
 .formfoot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center}
-.note{font-size:12px;color:var(--muted)}
+.pricegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px 14px;max-height:360px;overflow:auto;padding-right:4px}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px;align-items:center;font-size:13px}
+.prow span{font-family:var(--f-mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prow input{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:5px 8px;text-align:right;width:100%}
+.prow input.missing{border-color:var(--warn)}
 
 @media (max-width:980px){
-  .grid3{grid-template-columns:1fr}
+  .grid3,.grid2{grid-template-columns:1fr}
   .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
   .kpi:nth-child(4){border-left:0}
   .kpi:nth-child(n+4){border-top:1px solid var(--line)}
 }
 @media (max-width:560px){
   .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .kpi{border-left:0}
-  .kpi:nth-child(even){border-left:1px solid var(--line)}
-  .kpi:nth-child(n+3){border-top:1px solid var(--line)}
+  .kpi{border-left:0!important;border-top:1px solid var(--line)}
+  .kpi:nth-child(-n+2){border-top:0}
+  .kpi:nth-child(even){border-left:1px solid var(--line)!important}
   .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .fgrid .w2{grid-column:span 2}
-  .filters .field input[type=search]{width:100%}
+  .filters input[type=search]{width:100%}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-
 </head><body>
 <div class="wrap">
   <header>
-    <div>
-      <h1>자주검사 현황</h1>
-    </div>
+    <h1>자주검사 현황</h1>
     <div class="status" id="status">데이터 불러오는 중…</div>
   </header>
 
   <section class="filters" aria-label="필터">
-    <div class="field"><span class="flabel">기간 보기</span>
-      <div class="seg" id="seg" role="group" aria-label="기간 단위">
-        <button type="button" data-mode="day" aria-pressed="true">일자별</button>
-        <button type="button" data-mode="week" aria-pressed="false">주차별</button>
-        <button type="button" data-mode="all" aria-pressed="false">전체</button>
-      </div>
-    </div>
     <div class="field"><label for="fPart">부품</label><select id="fPart"><option value="">전체</option></select></div>
     <div class="field"><label for="fColor">색상</label><select id="fColor"><option value="">전체</option></select></div>
     <div class="field"><label for="fQ">제품코드 검색</label><input type="search" id="fQ" placeholder="예: DSAD"></div>
     <button class="btn" id="fReset" type="button">필터 초기화</button>
   </section>
 
-  <section class="chips" id="chips" aria-label="기간 선택"></section>
+  <section class="kpis" id="kpis" aria-label="수량·금액 요약"></section>
 
-  <section class="kpis" id="kpis" aria-label="요약"></section>
+  <section class="grid2">
+    <div class="panel">
+      <div class="phead">
+        <div><h2>재사용 및 폐기 수량</h2><div class="sub">막대 위 숫자 = 재사용 + 폐기 (EA)</div></div>
+        <div class="seg sm" id="chartSeg" role="group" aria-label="그래프 단위">
+          <button type="button" data-unit="day" aria-pressed="false">일자</button>
+          <button type="button" data-unit="week" aria-pressed="true">주차</button>
+        </div>
+      </div>
+      <div class="legend-inline"><span><i class="sw" style="background:var(--reuse)"></i>재사용</span><span><i class="sw" style="background:var(--scrap)"></i>폐기</span></div>
+      <div id="qtyChart" class="chart"></div>
+    </div>
+    <div class="panel">
+      <div class="phead">
+        <div><h2>재사용 및 폐기 금액</h2><div class="sub">수량 × 제품코드별 단가 (원) · 단가가 없는 코드는 빠짐</div></div>
+      </div>
+      <div class="legend-inline"><span><i class="sw" style="background:var(--reuse)"></i>재사용</span><span><i class="sw" style="background:var(--scrap)"></i>폐기</span></div>
+      <div id="amtChart" class="chart"></div>
+    </div>
+  </section>
 
   <section class="grid3">
     <div class="panel">
-      <div><h2>검사일별 불량률</h2><div class="sub">막대 위 숫자는 불량률(불량수 ÷ 검사수량) · 선택한 기간이 진하게 표시됩니다</div></div>
+      <div><h2>검사일별 불량률</h2><div class="sub">막대 위 숫자 = 불량수 ÷ 검사수량 · 최근 14일</div></div>
       <div id="daily"></div>
     </div>
     <div class="panel">
@@ -190,6 +198,18 @@ tfoot td{font-weight:700;background:var(--soft)}
     </div>
   </section>
 
+  <section class="formpanel" id="pricePanel" hidden aria-label="단가 입력">
+    <div class="toolbar"><h2>제품코드별 단가 (원/EA)</h2><span class="note" id="priceNote"></span></div>
+    <div class="pricegrid" id="priceGrid"></div>
+    <div class="formfoot">
+      <div class="formmsg" id="priceMsg" role="status"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" type="button" id="priceClose">닫기</button>
+        <button class="btn primary" type="button" id="priceSave">단가 저장</button>
+      </div>
+    </div>
+  </section>
+
   <section class="formpanel" id="formPanel" hidden aria-label="검사 기록 입력">
     <div class="toolbar"><h2 id="formTitle">검사 기록 추가</h2><span class="note">불량 0이면 0으로 입력하세요. 빈칸은 0으로 저장됩니다.</span></div>
     <form id="form" novalidate>
@@ -197,7 +217,7 @@ tfoot td{font-weight:700;background:var(--soft)}
         <div class="field"><label for="iDate">검사일 *</label><input type="date" id="iDate" required></div>
         <div class="field w2"><label for="iCode">제품코드 *</label><input id="iCode" class="mono" list="dlCode" autocomplete="off" required></div>
         <div class="field"><label for="iPart">부품명 *</label><input id="iPart" list="dlPart" autocomplete="off" required></div>
-        <div class="field"><label for="iColor">색상 *</label><input id="iColor" list="dlColor" autocomplete="off" required></div>
+        <div class="field"><label for="iColor">색상</label><input id="iColor" list="dlColor" autocomplete="off"></div>
         <div class="field"><label for="iPack">포장일</label><input type="date" id="iPack"></div>
         <div class="fgroup">수량</div>
         <div class="field"><label for="iQty">검사수량 *</label><input type="number" id="iQty" min="1" inputmode="numeric" required></div>
@@ -221,14 +241,32 @@ tfoot td{font-weight:700;background:var(--soft)}
     </div>
   </section>
 
-  <section style="display:flex;flex-direction:column;gap:10px">
+  <section class="records" aria-label="검사 기록">
     <div class="toolbar">
       <h2>검사 기록 <span class="status num" id="count"></span></h2>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn" type="button" id="btnReset" hidden>data.json 기준으로 되돌리기</button><button class="btn" type="button" id="btnJson">data.json 내보내기</button><button class="btn" type="button" id="btnCsv">CSV 내보내기</button>
+        <button class="btn" type="button" id="btnReset" hidden>data.json 기준으로 되돌리기</button>
+        <button class="btn" type="button" id="btnPrice">단가 입력</button>
+        <button class="btn" type="button" id="btnJson">data.json 내보내기</button>
+        <button class="btn" type="button" id="btnCsv">CSV 내보내기</button>
         <button class="btn primary" type="button" id="btnAdd">+ 검사 기록 추가</button>
       </div>
     </div>
+
+    <div class="periodbar" aria-label="기간 선택">
+      <div class="seg" id="seg" role="group" aria-label="기간 단위">
+        <button type="button" data-mode="day" aria-pressed="false">일자별</button>
+        <button type="button" data-mode="week" aria-pressed="true">주차별</button>
+        <button type="button" data-mode="all" aria-pressed="false">전체</button>
+      </div>
+      <span class="divider"></span>
+      <div class="pick" id="pickY"><label for="selY">년도</label><select id="selY"></select></div>
+      <div class="pick" id="pickM"><label for="selM">월</label><select id="selM"></select></div>
+      <div class="pick" id="pickW"><label for="selW">주</label><select id="selW"></select></div>
+      <div class="pick" id="pickD" hidden><label for="selD">일</label><select id="selD"></select></div>
+      <span class="range" id="range"></span>
+    </div>
+
     <div class="tablebox">
       <table>
         <thead>
@@ -244,11 +282,11 @@ tfoot td{font-weight:700;background:var(--soft)}
         <tfoot id="tfoot"></tfoot>
       </table>
     </div>
-    <div class="note">불량률 기준: 5% 미만 양호 · 5–10% 주의 · 10% 이상 경고. ⚠ 표시는 총 불량수와 유형 합계가 다르거나 재사용이 불량보다 많은 행입니다.</div>
+    <div class="note">불량률 기준: 5% 미만 양호 · 5–10% 주의 · 10% 이상 경고. ⚠ 표시는 총 불량수와 유형 합계가 다르거나 재사용이 불량보다 많은 행입니다. 주차는 월~일을 한 주로 보고, 그 주 목요일이 속한 달의 몇째 주인지로 셉니다.</div>
   </section>
 
-  <datalist id="dlPart"><option value="상판"><option value="뒤판"><option value="도어"><option value="모션용"></datalist>
-  <datalist id="dlColor"><option value="WW"><option value="FK"><option value="ML"></datalist>
+  <datalist id="dlPart"><option value="상판"><option value="뒤판"><option value="도어"><option value="측판"><option value="바닥판"></datalist>
+  <datalist id="dlColor"><option value="WW"><option value="FK"><option value="ML"><option value="NK"></datalist>
   <datalist id="dlCode"></datalist>
 </div>
 
@@ -259,101 +297,142 @@ tfoot td{font-weight:700;background:var(--soft)}
   const n = v => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
   const pct = (a,b) => b > 0 ? a / b : 0;
   const fmtPct = r => (r*100).toFixed(1) + '%';
+  const fmtN = v => Math.round(v).toLocaleString('ko-KR');
+  const fmtWon = v => v >= 1e8 ? (v/1e8).toFixed(2).replace(/\.?0+$/,'') + '억' : v >= 1e4 ? (Math.round(v/1e3)/10).toLocaleString('ko-KR') + '만' : fmtN(v);
   const fmtD = d => d ? d.slice(2).replace(/-/g,'.') : '';
   const level = r => r >= 0.10 ? 'crit' : r >= 0.05 ? 'warn' : 'ok';
   const levelTxt = {ok:'양호',warn:'주의',crit:'경고'};
+  const scrapOf = r => Math.max(0, n(r.defects) - n(r.reuse));
 
-  let db = null, col = null, rows = [], editingId = null, canWrite = true, downloads = null, armedDelete = null;
+  let rows = [], prices = {}, editingId = null, armedDelete = null;
+  const setStatus = t => { $('status').textContent = t; };
 
-  function setStatus(t){ $('status').textContent = t; }
-
-  // ---------- filters ----------
-  const F = { part:'', color:'', q:'', mode:'day', key:'' };
-  ['fPart','fColor','fQ'].forEach(id => $(id).addEventListener('input', () => {
-    F.part = $('fPart').value; F.color = $('fColor').value; F.q = $('fQ').value.trim().toUpperCase();
-    render();
-  }));
-  $('fReset').addEventListener('click', () => { ['fPart','fColor','fQ'].forEach(id => $(id).value=''); F.part=F.color=F.q=''; F.key=''; render(); });
-  $('seg').addEventListener('click', e => {
-    const b = e.target.closest('[data-mode]'); if (!b || b.dataset.mode === F.mode) return;
-    F.mode = b.dataset.mode; F.key = '';
-    $('seg').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    render();
-  });
-  $('chips').addEventListener('click', e => { const c = e.target.closest('[data-key]'); if (c){ F.key = c.dataset.key; render(); } });
-
-  // ---------- 기간 (일자 / 주차: 월요일 시작, ISO 주차) ----------
+  // ---------- 날짜 · 주차 ----------
   const DOW = ['일','월','화','수','목','금','토'];
-  const ymd = t => t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
+  const pad = x => String(x).padStart(2,'0');
+  const ymd = t => t.getFullYear() + '-' + pad(t.getMonth()+1) + '-' + pad(t.getDate());
   const toDate = s => new Date(s + 'T00:00:00');
-  function weekStart(s){ const t = toDate(s); t.setDate(t.getDate() - (t.getDay()+6)%7); return ymd(t); }
-  function isoWeek(ws){ const thu = toDate(ws); thu.setDate(thu.getDate()+3); const jan4 = new Date(thu.getFullYear(),0,4); return 1 + Math.round(((thu - jan4)/864e5 - 3 + (jan4.getDay()+6)%7)/7); }
   const md = s => s.slice(5).replace('-','.');
-  // 월 주차: 월~일 한 주를 그 주 목요일이 속한 달의 N주차로 셈 (예: 11/02~11/08 → 11월 1주차)
-  function monthWeek(ws){ const thu = toDate(ws); thu.setDate(thu.getDate()+3); return `${thu.getMonth()+1}월 ${Math.ceil(thu.getDate()/7)}주차`; }
-  function periodKey(r){ return r.date ? (F.mode === 'week' ? weekStart(r.date) : r.date) : ''; }
-  function periodLabel(k){
-    if (F.mode === 'week'){ const e = toDate(k); e.setDate(e.getDate()+6); return {main:monthWeek(k), sub:`${md(k)}~${md(ymd(e))}`}; }
-    return {main:`${md(k)} (${DOW[toDate(k).getDay()]})`, sub:''};
+  function weekStart(s){ const t = toDate(s); t.setDate(t.getDate() - (t.getDay()+6)%7); return ymd(t); }
+  // 주차: 월~일 한 주를 그 주 목요일이 속한 달의 N주차로 셈 (예: 11/02~11/08 → 11월 1주차)
+  function weekInfo(ws){ const thu = toDate(ws); thu.setDate(thu.getDate()+3); return {y:thu.getFullYear(), m:thu.getMonth()+1, w:Math.ceil(thu.getDate()/7)}; }
+  function weeksOfMonth(y, m){
+    const out = []; const first = new Date(y, m-1, 1); first.setDate(first.getDate() - (first.getDay()+6)%7);
+    for (let t = new Date(first); ; t.setDate(t.getDate()+7)){ const ws = ymd(t), wi = weekInfo(ws);
+      if (wi.y === y && wi.m === m) out.push({ws, w:wi.w}); else if (out.length) break;
+      if (out.length === 0 && t > new Date(y, m, 7)) break; }
+    return out;
   }
+  const weekEnd = ws => { const e = toDate(ws); e.setDate(e.getDate()+6); return ymd(e); };
+  const weekLabel = ws => { const wi = weekInfo(ws); return `${wi.m}월 ${wi.w}주차`; };
 
-  function base(){
-    return rows.filter(r =>
-      (!F.part || r.part === F.part) && (!F.color || r.color === F.color) &&
-      (!F.q || String(r.code||'').toUpperCase().includes(F.q)));
+  // ---------- 상단 필터 (부품·색상·코드) ----------
+  const F = { part:'', color:'', q:'' };
+  ['fPart','fColor','fQ'].forEach(id => $(id).addEventListener('input', () => { F.part = $('fPart').value; F.color = $('fColor').value; F.q = $('fQ').value.trim().toUpperCase(); render(); }));
+  $('fReset').addEventListener('click', () => { ['fPart','fColor','fQ'].forEach(id => $(id).value=''); F.part=F.color=F.q=''; render(); });
+  const base = () => rows.filter(r => (!F.part || r.part === F.part) && (!F.color || r.color === F.color) && (!F.q || String(r.code||'').toUpperCase().includes(F.q)));
+
+  // ---------- 검사 기록 기간 선택 (년도 · 월 · 주 / 일) ----------
+  const P = { mode:'week', y:0, m:0, w:'', d:'' };
+  $('seg').addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (!b) return; P.mode = b.dataset.mode;
+    $('seg').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); renderPeriod(); renderTable(); });
+  $('selY').addEventListener('change', () => { P.y = +$('selY').value; P.w = P.d = ''; renderPeriod(); renderTable(); });
+  $('selM').addEventListener('change', () => { P.m = +$('selM').value; P.w = P.d = ''; renderPeriod(); renderTable(); });
+  $('selW').addEventListener('change', () => { P.w = $('selW').value; renderPeriod(); renderTable(); });
+  $('selD').addEventListener('change', () => { P.d = $('selD').value; renderPeriod(); renderTable(); });
+
+  function latestDate(){ return rows.reduce((a,r) => r.date && r.date > a ? r.date : a, ''); }
+  function initPeriod(){ const d = latestDate() || ymd(new Date()); const wi = weekInfo(weekStart(d)); P.y = wi.y; P.m = wi.m; P.w = weekStart(d); P.d = d; }
+
+  function renderPeriod(){
+    const all = P.mode === 'all';
+    $('pickY').hidden = $('pickM').hidden = all;
+    $('pickW').hidden = all || P.mode !== 'week';
+    $('pickD').hidden = all || P.mode !== 'day';
+    const years = new Set(rows.map(r => r.date && +r.date.slice(0,4)).filter(Boolean)); years.add(new Date().getFullYear()); if (P.y) years.add(P.y);
+    $('selY').innerHTML = [...years].sort().map(y => `<option value="${y}" ${y===P.y?'selected':''}>${y}년</option>`).join('');
+    $('selM').innerHTML = Array.from({length:12}, (_,i) => i+1).map(m => `<option value="${m}" ${m===P.m?'selected':''}>${m}월</option>`).join('');
+    const counts = {}; base().forEach(r => { if (r.date) counts[r.date] = (counts[r.date]||0) + 1; });
+    if (P.mode === 'week'){
+      const ws = weeksOfMonth(P.y, P.m);
+      if (!ws.some(x => x.ws === P.w)){ const withData = ws.filter(x => Object.keys(counts).some(d => weekStart(d) === x.ws)); P.w = (withData.pop() || ws[0] || {}).ws || ''; }
+      $('selW').innerHTML = ws.map(x => { const c = Object.entries(counts).filter(([d]) => weekStart(d) === x.ws).reduce((a,[,v]) => a+v, 0);
+        return `<option value="${x.ws}" ${x.ws===P.w?'selected':''}>${x.w}주${c?` (${c}건)`:''}</option>`; }).join('');
+      $('range').innerHTML = P.w ? `<b>${weekLabel(P.w)}</b> · ${md(P.w)} ~ ${md(weekEnd(P.w))}` : '';
+    } else if (P.mode === 'day'){
+      const last = new Date(P.y, P.m, 0).getDate(); const days = Array.from({length:last}, (_,i) => `${P.y}-${pad(P.m)}-${pad(i+1)}`);
+      if (!days.includes(P.d)){ const withData = days.filter(d => counts[d]); P.d = withData.pop() || days[0]; }
+      $('selD').innerHTML = days.map(d => `<option value="${d}" ${d===P.d?'selected':''}>${+d.slice(8)}일 (${DOW[toDate(d).getDay()]})${counts[d]?` · ${counts[d]}건`:''}</option>`).join('');
+      $('range').innerHTML = `<b>${md(P.d)} (${DOW[toDate(P.d).getDay()]})</b>`;
+    } else $('range').innerHTML = '<b>전체 기간</b>';
   }
-  function filtered(){
+  function periodRows(){
     const b = base();
-    return F.mode === 'all' || !F.key ? b : b.filter(r => periodKey(r) === F.key);
+    if (P.mode === 'week') return b.filter(r => r.date && weekStart(r.date) === P.w);
+    if (P.mode === 'day') return b.filter(r => r.date === P.d);
+    return b;
   }
 
-  function renderChips(){
-    if (F.mode === 'all'){ $('chips').innerHTML = ''; return; }
-    const g = {};
-    base().forEach(r => { const k = periodKey(r); if (!k) return; (g[k] ||= {n:0,qty:0,def:0}); g[k].n++; g[k].qty += n(r.qty); g[k].def += n(r.defects); });
-    const keys = Object.keys(g).sort();
-    if (F.mode === 'day') keys.reverse();   // 일자: 최신순 / 주차: 1주차, 2주차 … 순
-    if (!keys.includes(F.key)) F.key = keys.length ? keys.slice().sort().pop() : '';
-    $('chips').innerHTML = keys.map(k => { const L = periodLabel(k), rt = pct(g[k].def, g[k].qty);
-      return `<button type="button" class="chip" data-key="${k}" aria-pressed="${k===F.key}"><span class="cl num">${L.main}</span>${L.sub?`<span class="cs num">${L.sub}</span>`:''}<span class="cs num"><span class="dot ${level(rt)}"></span>${g[k].n}건 · ${fmtPct(rt)}</span></button>`; }).join('');
-    const sel = $('chips').querySelector('[aria-pressed="true"]'); if (sel) sel.scrollIntoView({block:'nearest', inline:'nearest'});
-  }
-
-  function fillSelect(sel, values){
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">전체</option>' + values.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
-    if (values.includes(cur)) sel.value = cur;
-  }
+  // ---------- 그래프 단위 ----------
+  let unit = 'week';
+  $('chartSeg').addEventListener('click', e => { const b = e.target.closest('[data-unit]'); if (!b) return; unit = b.dataset.unit;
+    $('chartSeg').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); renderCharts(base()); });
 
   // ---------- render ----------
-  function render(){
-    const uniq = k => [...new Set(rows.map(r => r[k]).filter(Boolean))].sort();
-    fillSelect($('fPart'), uniq('part'));
-    fillSelect($('fColor'), uniq('color'));
-    $('dlCode').innerHTML = uniq('code').map(c => `<option value="${esc(c)}">`).join('');
+  function fillSelect(sel, values){ const cur = sel.value;
+    sel.innerHTML = '<option value="">전체</option>' + values.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
+    if (values.includes(cur)) sel.value = cur; }
+  const uniq = k => [...new Set(rows.map(r => r[k]).filter(Boolean))].sort();
 
-    renderChips();
-    const list = filtered().slice().sort((a,b) => (b.date||'').localeCompare(a.date||'') || (a.seq||0)-(b.seq||0));
-    renderKpis(list); renderDaily(base()); renderTypes(list); renderByCode(list); renderTable(list);
+  function render(){
+    fillSelect($('fPart'), uniq('part')); fillSelect($('fColor'), uniq('color'));
+    $('dlCode').innerHTML = uniq('code').map(c => `<option value="${esc(c)}">`).join('');
+    const b = base();
+    renderKpis(b); renderCharts(b); renderDaily(b); renderTypes(b); renderByCode(b);
+    renderPeriod(); renderTable();
   }
 
   function sums(list){
-    const s = {qty:0,def:0,reuse:0,top:0,bottom:0,both:0,other:0};
-    list.forEach(r => { s.qty+=n(r.qty); s.def+=n(r.defects); s.reuse+=n(r.reuse); s.top+=n(r.top); s.bottom+=n(r.bottom); s.both+=n(r.both); s.other+=n(r.other); });
+    const s = {qty:0,def:0,reuse:0,scrap:0,top:0,bottom:0,both:0,other:0,reuseAmt:0,scrapAmt:0,noPrice:new Set()};
+    list.forEach(r => { s.qty+=n(r.qty); s.def+=n(r.defects); s.reuse+=n(r.reuse); s.scrap+=scrapOf(r); s.top+=n(r.top); s.bottom+=n(r.bottom); s.both+=n(r.both); s.other+=n(r.other);
+      const p = prices[r.code]; if (p > 0){ s.reuseAmt += n(r.reuse)*p; s.scrapAmt += scrapOf(r)*p; } else if (n(r.defects)) s.noPrice.add(r.code); });
     return s;
   }
 
   function renderKpis(list){
-    const s = sums(list), rate = pct(s.def, s.qty), lv = level(rate);
-    const lots = list.length, badLots = list.filter(r => level(pct(n(r.defects), n(r.qty))) !== 'ok').length;
-    const k = (label, v, sub, cls='') => `<div class="kpi ${cls}"><span class="k">${label}</span><span class="v num">${v}</span><span class="s">${sub}</span></div>`;
+    const s = sums(list);
+    const sw = c => `<i class="sw" style="background:var(--${c})"></i>`;
+    const k = (label, v, unitTxt, sub) => `<div class="kpi"><span class="k">${label}</span><span class="v num">${v}<small>${unitTxt}</small></span><span class="s">${sub}</span></div>`;
+    const priceSub = s.noPrice.size ? `단가 없는 코드 ${s.noPrice.size}개 제외` : '전 코드 단가 반영';
     $('kpis').innerHTML =
-      k('검사 건수', lots.toLocaleString(), `주의·경고 ${badLots}건`) +
-      k('검사수량', s.qty.toLocaleString(), 'EA') +
-      k('총 불량수', s.def.toLocaleString(), 'EA') +
-      k('불량률', fmtPct(rate), `<span class="pill ${lv}">${levelTxt[lv]}</span>`, 'hl') +
-      k('재사용', s.reuse.toLocaleString(), `불량 중 ${fmtPct(pct(s.reuse, s.def))}`) +
-      k('폐기 (불량−재사용)', Math.max(0, s.def - s.reuse).toLocaleString(), `검사수량 대비 ${fmtPct(pct(Math.max(0,s.def-s.reuse), s.qty))}`);
+      k('검사 수량', fmtN(s.qty), 'EA', `${list.length}건 · 불량 ${fmtN(s.def)} (${fmtPct(pct(s.def,s.qty))})`) +
+      k(`${sw('scrap')}폐기 수량`, fmtN(s.scrap), 'EA', `검사수량 대비 ${fmtPct(pct(s.scrap,s.qty))}`) +
+      k(`${sw('reuse')}재사용 수량`, fmtN(s.reuse), 'EA', `불량 중 ${fmtPct(pct(s.reuse,s.def))}`) +
+      k(`${sw('scrap')}폐기 금액`, fmtWon(s.scrapAmt), '원', priceSub) +
+      k(`${sw('reuse')}재사용 금액`, fmtWon(s.reuseAmt), '원', priceSub);
+  }
+
+  function groupBy(list, keyFn){ const g = {}; list.forEach(r => { if (!r.date) return; const k = keyFn(r); (g[k] ||= []).push(r); }); return g; }
+  function stackChart(el, groups, keys, labelFn, valFn, fmt){
+    if (!keys.length){ el.innerHTML = '<div class="empty">표시할 기록이 없습니다.</div>'; return; }
+    const vals = keys.map(k => valFn(groups[k]));
+    const max = Math.max(1, ...vals.map(v => v.reuse + v.scrap));
+    el.innerHTML =
+      `<div class="cols">${keys.map((k,i) => { const v = vals[i], tot = v.reuse + v.scrap;
+        return `<div class="col" title="${labelFn(k).replace('<br>',' ')} · 재사용 ${fmt(v.reuse)} / 폐기 ${fmt(v.scrap)}"><b class="num">${fmt(tot)}</b>
+          <span class="stackbar" style="height:${(tot/max*100).toFixed(1)}%"><i style="height:${tot?(v.reuse/tot*100).toFixed(1):0}%;background:var(--reuse)"></i><i style="height:${tot?(v.scrap/tot*100).toFixed(1):0}%;background:var(--scrap)"></i></span></div>`; }).join('')}</div>` +
+      `<div class="collbl">${keys.map(k => `<span class="num">${labelFn(k)}</span>`).join('')}</div>`;
+  }
+  function renderCharts(list){
+    const keyFn = unit === 'week' ? (r => weekStart(r.date)) : (r => r.date);
+    const g = groupBy(list, keyFn);
+    const keys = Object.keys(g).sort().slice(unit === 'week' ? -10 : -14);
+    const labelFn = unit === 'week' ? (k => { const wi = weekInfo(k); return `${wi.m}월<br>${wi.w}주`; }) : (k => md(k));
+    stackChart($('qtyChart'), g, keys, labelFn, rs => ({reuse: rs.reduce((a,r)=>a+n(r.reuse),0), scrap: rs.reduce((a,r)=>a+scrapOf(r),0)}), fmtN);
+    const s = sums(list);
+    if (Object.keys(prices).length === 0){ $('amtChart').innerHTML = '<div class="empty">아직 단가가 없습니다. 검사 기록 위 “단가 입력”에서 제품코드별 단가를 넣으면 금액 그래프가 나옵니다.</div>'; return; }
+    stackChart($('amtChart'), g, keys, labelFn, rs => ({reuse: rs.reduce((a,r)=>a+n(r.reuse)*(prices[r.code]||0),0), scrap: rs.reduce((a,r)=>a+scrapOf(r)*(prices[r.code]||0),0)}), fmtWon);
+    if (s.noPrice.size) $('amtChart').insertAdjacentHTML('beforeend', `<div class="note">단가 없는 코드 ${s.noPrice.size}개는 금액에서 빠졌습니다.</div>`);
   }
 
   function renderDaily(list){
@@ -361,25 +440,20 @@ tfoot td{font-weight:700;background:var(--soft)}
     list.forEach(r => { if(!r.date) return; (by[r.date] ||= {qty:0,def:0}); by[r.date].qty += n(r.qty); by[r.date].def += n(r.defects); });
     const days = Object.keys(by).sort().slice(-14);
     if (!days.length){ $('daily').innerHTML = '<div class="empty">표시할 기록이 없습니다.</div>'; return; }
-    const rates = days.map(d => pct(by[d].def, by[d].qty));
-    const max = Math.max(0.05, ...rates) * 1.15;
+    const rates = days.map(d => pct(by[d].def, by[d].qty)); const max = Math.max(0.05, ...rates) * 1.15;
     $('daily').innerHTML =
-      `<div class="cols">${days.map((d,i) => `<div class="col${F.mode !== 'all' && F.key && (F.mode === 'week' ? weekStart(d) : d) !== F.key ? ' dim' : ''}" title="${d} · 불량 ${by[d].def} / 검사 ${by[d].qty}"><b class="num">${fmtPct(rates[i])}</b><i style="height:${(rates[i]/max*100).toFixed(1)}%;background:var(--${level(rates[i])==='ok'?'accent':level(rates[i])})"></i></div>`).join('')}</div>` +
-      `<div class="collbl">${days.map(d => `<span class="num">${d.slice(5).replace('-','.')}</span>`).join('')}</div>` +
-      `<div class="note">최근 ${days.length}일 · 막대 색: 파랑 양호 / 주황 주의 / 빨강 경고</div>`;
+      `<div class="cols">${days.map((d,i) => `<div class="col" title="${d} · 불량 ${by[d].def} / 검사 ${by[d].qty}"><b class="num">${fmtPct(rates[i])}</b><i class="one" style="height:${(rates[i]/max*100).toFixed(1)}%;background:var(--${level(rates[i])==='ok'?'accent':level(rates[i])})"></i></div>`).join('')}</div>` +
+      `<div class="collbl">${days.map(d => `<span class="num">${md(d)}</span>`).join('')}</div>`;
   }
 
   function renderTypes(list){
-    const s = sums(list);
-    const typed = s.top + s.bottom + s.both + s.other;
-    const none = Math.max(0, s.def - typed);
+    const s = sums(list), typed = s.top + s.bottom + s.both + s.other, none = Math.max(0, s.def - typed);
     const items = [['윗면 (이물질)', s.top, 't-top'], ['아랫면 (이물질)', s.bottom, 't-bottom'], ['양면 (이물질)', s.both, 't-both'], ['기타', s.other, 't-other'], ['미분류', none, 't-none']];
     const total = items.reduce((a,b) => a + b[1], 0);
     if (!total){ $('types').innerHTML = '<div class="empty">불량 기록이 없습니다.</div>'; return; }
     $('types').innerHTML =
       `<div class="stack" role="img" aria-label="불량 유형 비율">${items.filter(i=>i[1]).map(i => `<span style="width:${(i[1]/total*100).toFixed(2)}%;background:var(--${i[2]})" title="${i[0]} ${i[1]}"></span>`).join('')}</div>` +
-      `<div class="legend">${items.map(i => `<span class="sw" style="background:var(--${i[2]})"></span><span>${i[0]}</span><span class="num" style="text-align:right;font-weight:600">${i[1]}</span><span class="num note" style="text-align:right">${fmtPct(i[1]/total)}</span>`).join('')}</div>` +
-      (typed > s.def ? `<div class="note">유형 합계(${typed})가 총 불량수(${s.def})보다 많습니다. 한 장에 여러 유형이 기록된 경우일 수 있습니다.</div>` : '');
+      `<div class="legend">${items.map(i => `<span class="sw" style="background:var(--${i[2]})"></span><span>${i[0]}</span><span class="num" style="text-align:right;font-weight:600">${i[1]}</span><span class="num note" style="text-align:right">${fmtPct(i[1]/total)}</span>`).join('')}</div>`;
   }
 
   function renderByCode(list){
@@ -388,142 +462,66 @@ tfoot td{font-weight:700;background:var(--soft)}
     const arr = Object.entries(by).map(([code,v]) => ({code, ...v, rate:pct(v.def,v.qty)})).sort((a,b) => b.rate-a.rate || b.def-a.def).slice(0,8);
     if (!arr.length){ $('bycode').innerHTML = '<div class="empty">표시할 기록이 없습니다.</div>'; return; }
     const max = Math.max(...arr.map(a=>a.rate), 0.01);
-    $('bycode').innerHTML = arr.map(a => `<div class="rrow" title="${esc(a.code)} · 불량 ${a.def} / 검사 ${a.qty}">
-      <span class="code">${esc(a.code)}</span>
+    $('bycode').innerHTML = arr.map(a => `<div class="rrow" title="${esc(a.code)} · 불량 ${a.def} / 검사 ${a.qty}"><span class="code">${esc(a.code)}</span>
       <span class="bar"><i style="width:${(a.rate/max*100).toFixed(1)}%;background:var(--${level(a.rate)==='ok'?'accent':level(a.rate)})"></i></span>
       <span class="pct num">${fmtPct(a.rate)}<br><span class="note" style="font-weight:400">${a.def}/${a.qty}</span></span></div>`).join('');
   }
 
   function issues(r){
-    const out = [];
-    const typed = n(r.top)+n(r.bottom)+n(r.both)+n(r.other);
+    const out = [], typed = n(r.top)+n(r.bottom)+n(r.both)+n(r.other);
     if (typed && typed !== n(r.defects)) out.push(`유형 합계 ${typed} ≠ 총 불량 ${n(r.defects)}`);
     if (n(r.reuse) > n(r.defects)) out.push('재사용이 총 불량보다 많음');
     if (n(r.defects) > n(r.qty)) out.push('불량이 검사수량보다 많음');
     return out;
   }
 
-  function renderTable(list){
-    const pl = F.mode !== 'all' && F.key ? periodLabel(F.key) : null;
-    $('count').textContent = (pl ? `${pl.main}${pl.sub ? ' (' + pl.sub + ')' : ''} · ` : '') + `${list.length}건` + (list.length !== rows.length ? ` / 전체 ${rows.length}건` : '');
+  function renderTable(){
+    const list = periodRows().slice().sort((a,b) => (b.date||'').localeCompare(a.date||'') || (a.seq||0)-(b.seq||0));
+    $('count').textContent = `${list.length}건` + (list.length !== rows.length ? ` / 전체 ${rows.length}건` : '');
     if (!list.length){
-      $('tbody').innerHTML = `<tr><td colspan="15" class="empty" style="text-align:center;padding:28px">${rows.length ? '필터에 맞는 기록이 없습니다.' : '아직 검사 기록이 없습니다. 오른쪽 위 “+ 검사 기록 추가”로 첫 기록을 입력하세요.'}</td></tr>`;
+      $('tbody').innerHTML = `<tr><td colspan="15" class="empty" style="text-align:center;padding:28px">${rows.length ? '선택한 기간에 기록이 없습니다.' : '아직 검사 기록이 없습니다. “+ 검사 기록 추가”로 첫 기록을 입력하세요.'}</td></tr>`;
       $('tfoot').innerHTML = ''; return;
     }
     const z = v => n(v) ? n(v) : '<span class="dim">–</span>';
     $('tbody').innerHTML = list.map(r => {
-      const rate = pct(n(r.defects), n(r.qty)), lv = level(rate), iss = issues(r);
-      const del = armedDelete === r._id;
+      const rate = pct(n(r.defects), n(r.qty)), lv = level(rate), iss = issues(r), del = armedDelete === r._id;
       return `<tr>
-        <td class="num">${fmtD(r.date)}</td>
-        <td class="mono">${esc(r.code)}</td><td>${esc(r.part)}</td><td>${esc(r.color)}</td>
+        <td class="num">${fmtD(r.date)}</td><td class="mono" title="${esc(r.note)}">${esc(r.code)}</td><td>${esc(r.part)}</td><td>${esc(r.color)}</td>
         <td class="num dim">${fmtD(r.packDate)}</td>
-        <td class="r num">${n(r.qty)}</td><td class="r num"><b>${n(r.defects)}</b></td><td class="r num">${z(r.reuse)}</td><td class="r num">${z(Math.max(0,n(r.defects)-n(r.reuse)))}</td>
+        <td class="r num">${n(r.qty)}</td><td class="r num"><b>${n(r.defects)}</b></td><td class="r num">${z(r.reuse)}</td><td class="r num">${z(scrapOf(r))}</td>
         <td class="r num">${z(r.top)}</td><td class="r num">${z(r.bottom)}</td><td class="r num">${z(r.both)}</td><td class="r num">${z(r.other)}</td>
         <td class="c"><span class="pill ${lv}">${fmtPct(rate)}</span> ${iss.length ? `<span class="flag" title="${esc(iss.join(' · '))}">⚠</span>` : ''}</td>
-        <td>${canWrite ? `<div class="rowact"><button class="btn" data-edit="${esc(r._id)}" type="button">수정</button><button class="btn ${del?'danger':''}" data-del="${esc(r._id)}" type="button">${del?'삭제 확인':'삭제'}</button></div>` : (r.note ? `<span class="note">${esc(r.note)}</span>` : '')}</td>
+        <td><div class="rowact"><button class="btn" data-edit="${esc(r._id)}" type="button">수정</button><button class="btn ${del?'danger':''}" data-del="${esc(r._id)}" type="button">${del?'삭제 확인':'삭제'}</button></div></td>
       </tr>`; }).join('');
     const s = sums(list);
-    $('tfoot').innerHTML = `<tr><td colspan="5">합계</td><td class="r num">${s.qty}</td><td class="r num">${s.def}</td><td class="r num">${s.reuse}</td><td class="r num">${Math.max(0,s.def-s.reuse)}</td><td class="r num">${s.top}</td><td class="r num">${s.bottom}</td><td class="r num">${s.both}</td><td class="r num">${s.other}</td><td class="c"><span class="pill ${level(pct(s.def,s.qty))}">${fmtPct(pct(s.def,s.qty))}</span></td><td></td></tr>`;
+    $('tfoot').innerHTML = `<tr><td colspan="5">합계</td><td class="r num">${s.qty}</td><td class="r num">${s.def}</td><td class="r num">${s.reuse}</td><td class="r num">${s.scrap}</td><td class="r num">${s.top}</td><td class="r num">${s.bottom}</td><td class="r num">${s.both}</td><td class="r num">${s.other}</td><td class="c"><span class="pill ${level(pct(s.def,s.qty))}">${fmtPct(pct(s.def,s.qty))}</span></td><td></td></tr>`;
   }
 
-  // ---------- table actions ----------
-  $('tbody').addEventListener('click', async e => {
-    const ed = e.target.closest('[data-edit]'), dl = e.target.closest('[data-del]');
-    if (ed){ openForm(rows.find(r => r._id === ed.dataset.edit)); }
-    if (dl){
-      const id = dl.dataset.del;
-      if (armedDelete !== id){ armedDelete = id; render(); setTimeout(() => { if (armedDelete === id){ armedDelete = null; render(); } }, 4000); return; }
-      armedDelete = null;
-      try { await col.doc(id).delete(); setStatus('기록을 삭제했습니다.'); }
-      catch(err){ setStatus('삭제하지 못했습니다: ' + (err?.message || err?.code || '')); }
-    }
-  });
-
-  // ---------- form ----------
-  const FIELDS = {iDate:'date',iCode:'code',iPart:'part',iColor:'color',iPack:'packDate',iQty:'qty',iDef:'defects',iReuse:'reuse',iTop:'top',iBottom:'bottom',iBoth:'both',iOther:'other',iNote:'note'};
-  const NUMS = ['qty','defects','reuse','top','bottom','both','other'];
-  function openForm(r){
-    editingId = r ? r._id : null;
-    $('formTitle').textContent = r ? '검사 기록 수정' : '검사 기록 추가';
-    Object.entries(FIELDS).forEach(([id,k]) => { $(id).value = r ? (r[k] ?? '') : ''; });
-    if (!r){ const last = rows.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0]; $('iDate').value = last?.date || new Date().toISOString().slice(0,10); }
-    msg('', '');
-    $('formPanel').hidden = false; $('iCode').focus();
-    $('formPanel').scrollIntoView({block:'nearest', behavior:'smooth'});
-  }
-  function msg(t, cls){ const m = $('formMsg'); m.textContent = t; m.className = 'formmsg ' + (cls||''); }
-  $('btnAdd').addEventListener('click', () => openForm(null));
-  $('btnCancel').addEventListener('click', () => { $('formPanel').hidden = true; editingId = null; });
-
-  let saving = false;
-  $('btnSave').addEventListener('click', async () => {
-    if (saving || !col) return;
-    const d = {};
-    Object.entries(FIELDS).forEach(([id,k]) => { const v = $(id).value.trim(); d[k] = NUMS.includes(k) ? (v === '' ? 0 : Math.round(Number(v))) : (k==='code' ? v.toUpperCase() : v); });
-    if (!d.date || !d.code || !d.part || !d.color) return msg('검사일, 제품코드, 부품명, 색상은 꼭 입력해야 합니다.', 'err');
-    if (!(d.qty > 0)) return msg('검사수량은 1 이상이어야 합니다.', 'err');
-    if (NUMS.some(k => !Number.isFinite(d[k]) || d[k] < 0)) return msg('수량 칸에는 0 이상의 숫자만 입력하세요.', 'err');
-    if (d.defects > d.qty) return msg('총 불량수가 검사수량보다 많습니다. 값을 확인하세요.', 'err');
-    if (d.reuse > d.defects) return msg('재사용 수가 총 불량수보다 많습니다. 값을 확인하세요.', 'err');
-    const typed = d.top + d.bottom + d.both + d.other;
-    if (!d.defects && typed) d.defects = typed;
-    d.updatedAt = new Date().toISOString();
-    saving = true; $('btnSave').disabled = true; msg('저장 중…', '');
-    try {
-      if (editingId){ const prev = rows.find(r => r._id === editingId) || {}; await col.doc(editingId).set({...stripId(prev), ...d}); }
-      else { d.createdAt = d.updatedAt; d.seq = Date.now(); await col.add(d); }
-      const warn = typed && typed !== d.defects ? ` (참고: 유형 합계 ${typed}와 총 불량 ${d.defects}이 다릅니다)` : '';
-      msg((editingId ? '수정했습니다.' : '저장했습니다. 다음 기록을 이어서 입력할 수 있습니다.') + warn, warn ? 'warn' : 'ok');
-      if (!editingId){ ['iQty','iDef','iReuse','iTop','iBottom','iBoth','iOther','iNote'].forEach(id => $(id).value=''); $('iCode').select(); }
-      else { editingId = null; setTimeout(() => { $('formPanel').hidden = true; }, 700); }
-    } catch(err){
-      if (err?.code === 'invalid_argument'){ canWrite = false; applyWrite(); msg('이 페이지에 기록할 권한이 없습니다. 작성자에게 편집 권한을 요청하세요.', 'err'); }
-      else msg('저장하지 못했습니다. 잠시 후 다시 시도하세요. (' + (err?.code || err?.message || '') + ')', 'err');
-    } finally { saving = false; $('btnSave').disabled = false; }
-  });
-  function stripId(r){ const o = {...r}; delete o._id; return o; }
-
-  function applyWrite(){ $('btnAdd').hidden = !canWrite; if (!canWrite) $('formPanel').hidden = true; render(); }
-
-  // ---------- CSV ----------
-  $('btnCsv').addEventListener('click', async () => {
-    const list = filtered().slice().sort((a,b) => (a.date||'').localeCompare(b.date||''));
-    const head = ['검사일','제품코드','부품명','색상','포장일','검사수량','총불량수','재사용','폐기','윗면','아랫면','양면','기타','불량률(%)','비고'];
-    const q = v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
-    const lines = [head.join(',')].concat(list.map(r => [r.date,r.code,r.part,r.color,r.packDate,n(r.qty),n(r.defects),n(r.reuse),Math.max(0,n(r.defects)-n(r.reuse)),n(r.top),n(r.bottom),n(r.both),n(r.other),(pct(n(r.defects),n(r.qty))*100).toFixed(1),r.note].map(q).join(',')));
-    try { await downloads.save({filename:`WW_자주검사_${new Date().toISOString().slice(0,10)}.csv`, data:'﻿' + lines.join('\r\n')}); }
-    catch(err){ if (err?.code === 'unavailable') $('btnCsv').hidden = true; }
-  });
-
-  // ---------- 저장소: data.json(저장소 원본) + 이 브라우저의 수정본(localStorage) ----------
+  // ---------- 저장: data.json(저장소 원본) + 이 브라우저의 수정본(localStorage) ----------
   const KEY = 'self-inspection-data';
   let remoteUpdated = '';
   const readLocal = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(_) { return null; } };
+  const plainRows = () => rows.slice().sort((a,b) => (a.date||'').localeCompare(b.date||'') || (a.seq||0)-(b.seq||0)).map(r => { const o = {...r, id:r._id}; delete o._id; return o; });
   function persist(){
-    const data = { updated: new Date().toISOString(), rows: rows.map(r => { const o = {...r, id:r._id}; delete o._id; return o; }) };
-    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(_) {}
+    try { localStorage.setItem(KEY, JSON.stringify({updated:new Date().toISOString(), rows:plainRows(), prices})); } catch(_) {}
     showSource(true); render();
   }
   function showSource(local){
     $('btnReset').hidden = !local;
     setStatus(local ? `${rows.length}건 · 이 브라우저에서 수정한 내용 표시 중 (다른 사람에게는 안 보임)` : `${rows.length}건 · data.json 기준` + (remoteUpdated ? ` (${remoteUpdated.slice(0,10)})` : ''));
   }
-  col = {
-    doc(id){ return {
-      async delete(){ rows = rows.filter(r => r._id !== id); persist(); },
-      async set(d){ const v = {...d, _id:id}; const i = rows.findIndex(r => r._id === id); if (i >= 0) rows[i] = v; else rows.push(v); persist(); }
-    }; },
-    async add(d){ rows.push({...d, _id:'u' + Date.now().toString(36)}); persist(); }
-  };
   function saveFile(name, text, type){
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type})); a.download = name;
     document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
-  downloads = { async save({filename, data}){ saveFile(filename, data, 'text/csv;charset=utf-8'); } };
-  $('btnJson').addEventListener('click', () => {
-    const data = { updated: new Date().toISOString(), rows: rows.slice().sort((a,b) => (a.date||'').localeCompare(b.date||'') || (a.seq||0)-(b.seq||0)).map(r => { const o = {...r, id:r._id}; delete o._id; return o; }) };
-    saveFile('data.json', JSON.stringify(data, null, 1), 'application/json');
+  $('btnJson').addEventListener('click', () => saveFile('data.json', JSON.stringify({updated:new Date().toISOString(), prices, rows:plainRows()}, null, 1), 'application/json'));
+  $('btnCsv').addEventListener('click', () => {
+    const list = periodRows().slice().sort((a,b) => (a.date||'').localeCompare(b.date||''));
+    const head = ['검사일','제품코드','부품명','색상','포장일','검사수량','총불량수','재사용','폐기','윗면','아랫면','양면','기타','불량률(%)','단가','재사용금액','폐기금액','비고'];
+    const q = v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
+    const lines = [head.join(',')].concat(list.map(r => { const p = prices[r.code] || '';
+      return [r.date,r.code,r.part,r.color,r.packDate,n(r.qty),n(r.defects),n(r.reuse),scrapOf(r),n(r.top),n(r.bottom),n(r.both),n(r.other),(pct(n(r.defects),n(r.qty))*100).toFixed(1),p,p?n(r.reuse)*p:'',p?scrapOf(r)*p:'',r.note].map(q).join(','); }));
+    saveFile(`자주검사_${new Date().toISOString().slice(0,10)}.csv`, '﻿' + lines.join('\r\n'), 'text/csv;charset=utf-8');
   });
   let resetArmed = false;
   $('btnReset').addEventListener('click', () => {
@@ -532,7 +530,67 @@ tfoot td{font-weight:700;background:var(--soft)}
     location.reload();
   });
 
-  // ---------- boot ----------
+  // ---------- 표 동작 ----------
+  $('tbody').addEventListener('click', e => {
+    const ed = e.target.closest('[data-edit]'), dl = e.target.closest('[data-del]');
+    if (ed) openForm(rows.find(r => r._id === ed.dataset.edit));
+    if (dl){ const id = dl.dataset.del;
+      if (armedDelete !== id){ armedDelete = id; renderTable(); setTimeout(() => { if (armedDelete === id){ armedDelete = null; renderTable(); } }, 4000); return; }
+      armedDelete = null; rows = rows.filter(r => r._id !== id); persist(); }
+  });
+
+  // ---------- 입력 폼 ----------
+  const FIELDS = {iDate:'date',iCode:'code',iPart:'part',iColor:'color',iPack:'packDate',iQty:'qty',iDef:'defects',iReuse:'reuse',iTop:'top',iBottom:'bottom',iBoth:'both',iOther:'other',iNote:'note'};
+  const NUMS = ['qty','defects','reuse','top','bottom','both','other'];
+  const msg = (t, cls) => { $('formMsg').textContent = t; $('formMsg').className = 'formmsg ' + (cls||''); };
+  function openForm(r){
+    editingId = r ? r._id : null; $('pricePanel').hidden = true;
+    $('formTitle').textContent = r ? '검사 기록 수정' : '검사 기록 추가';
+    Object.entries(FIELDS).forEach(([id,k]) => { $(id).value = r ? (r[k] ?? '') : ''; });
+    if (!r) $('iDate').value = latestDate() || ymd(new Date());
+    msg(''); $('formPanel').hidden = false; $('iCode').focus();
+    $('formPanel').scrollIntoView({block:'nearest', behavior:'smooth'});
+  }
+  $('btnAdd').addEventListener('click', () => openForm(null));
+  $('btnCancel').addEventListener('click', () => { $('formPanel').hidden = true; editingId = null; });
+  $('btnSave').addEventListener('click', () => {
+    const d = {};
+    Object.entries(FIELDS).forEach(([id,k]) => { const v = $(id).value.trim(); d[k] = NUMS.includes(k) ? (v === '' ? 0 : Math.round(Number(v))) : (k==='code' ? v.toUpperCase() : v); });
+    if (!d.date || !d.code || !d.part) return msg('검사일, 제품코드, 부품명은 꼭 입력해야 합니다.', 'err');
+    if (!(d.qty > 0)) return msg('검사수량은 1 이상이어야 합니다.', 'err');
+    if (NUMS.some(k => !Number.isFinite(d[k]) || d[k] < 0)) return msg('수량 칸에는 0 이상의 숫자만 입력하세요.', 'err');
+    const typed = d.top + d.bottom + d.both + d.other;
+    if (!d.defects && typed) d.defects = typed;
+    if (d.defects > d.qty) return msg('총 불량수가 검사수량보다 많습니다. 값을 확인하세요.', 'err');
+    if (d.reuse > d.defects) return msg('재사용 수가 총 불량수보다 많습니다. 값을 확인하세요.', 'err');
+    d.updatedAt = new Date().toISOString();
+    if (editingId){ const i = rows.findIndex(r => r._id === editingId); rows[i] = {...rows[i], ...d}; }
+    else rows.push({...d, _id:'u' + Date.now().toString(36), seq:Date.now(), createdAt:d.updatedAt});
+    const warn = typed && typed !== d.defects ? ` (참고: 유형 합계 ${typed}와 총 불량 ${d.defects}이 다릅니다)` : '';
+    const wasEdit = !!editingId; editingId = null; persist();
+    msg((wasEdit ? '수정했습니다.' : '저장했습니다. 다음 기록을 이어서 입력할 수 있습니다.') + warn, warn ? 'warn' : 'ok');
+    if (!wasEdit){ ['iQty','iDef','iReuse','iTop','iBottom','iBoth','iOther','iNote'].forEach(id => $(id).value=''); $('iCode').select(); }
+    else setTimeout(() => { $('formPanel').hidden = true; }, 700);
+  });
+
+  // ---------- 단가 입력 ----------
+  $('btnPrice').addEventListener('click', () => {
+    $('formPanel').hidden = true;
+    const codes = uniq('code');
+    $('priceGrid').innerHTML = codes.map(c => `<label class="prow"><span title="${esc(c)}">${esc(c)}</span><input type="number" min="0" inputmode="numeric" data-code="${esc(c)}" value="${prices[c] ?? ''}" placeholder="원" class="${prices[c] ? '' : 'missing'}"></label>`).join('');
+    $('priceNote').textContent = `제품코드 ${codes.length}개 · 입력됨 ${codes.filter(c => prices[c] > 0).length}개`;
+    $('priceMsg').textContent = ''; $('pricePanel').hidden = false;
+    $('pricePanel').scrollIntoView({block:'nearest', behavior:'smooth'});
+  });
+  $('priceClose').addEventListener('click', () => { $('pricePanel').hidden = true; });
+  $('priceSave').addEventListener('click', () => {
+    const next = {};
+    $('priceGrid').querySelectorAll('input[data-code]').forEach(i => { const v = Number(i.value); if (i.value !== '' && Number.isFinite(v) && v > 0) next[i.dataset.code] = Math.round(v); });
+    prices = next; persist();
+    $('priceMsg').textContent = `단가 ${Object.keys(prices).length}개를 저장했습니다.`; $('priceMsg').className = 'formmsg ok';
+  });
+
+  // ---------- 시작 ----------
   render();
   (async () => {
     let remote = null;
@@ -543,9 +601,9 @@ tfoot td{font-weight:700;background:var(--soft)}
     const src = useLocal ? local : remote;
     if (!src){ setStatus('data.json을 불러오지 못했습니다. 페이지를 웹 주소로 열었는지 확인하세요.'); return; }
     rows = (src.rows || []).map(r => { const o = {...r, _id: r.id || r._id}; delete o.id; return o; });
-    showSource(useLocal); render();
+    prices = src.prices || {};
+    initPeriod(); showSource(useLocal); render();
   })();
 })();
 </script>
-
 </body></html>
