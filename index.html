@@ -1,5 +1,4 @@
-<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>자주검사 현황</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -9,7 +8,7 @@
   --bg:#f3f4f2; --panel:#ffffff; --ink:#1d2326; --muted:#5f696e; --line:#d9ddda; --soft:#eceeeb;
   --accent:#1f5f8b; --accent-ink:#ffffff; --accent-soft:#dce9f2;
   --ok:#2f7d4f; --ok-soft:#dcefe3; --warn:#a86a00; --warn-soft:#f7ead0; --crit:#b3372f; --crit-soft:#f6dcd9;
-  --reuse:#2f7fb3; --scrap:#c2553f;
+  --insp:#2a9d8f; --reuse:#4a7fd9; --scrap:#d0573f; --loss:#c4461f; --loss-soft:rgba(196,70,31,.12); --grid:#e6e9e7;
   --t-top:#1f5f8b; --t-bottom:#5aa0c8; --t-both:#8a6fb5; --t-other:#c48a3a; --t-none:#b9c0bc;
   --f-body:"IBM Plex Sans KR","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
@@ -18,13 +17,19 @@
   --bg:#141819; --panel:#1c2123; --ink:#e6eae8; --muted:#97a2a6; --line:#2e3638; --soft:#232a2c;
   --accent:#6fb0dc; --accent-ink:#0d1a22; --accent-soft:#1d3444;
   --ok:#6cc08d; --ok-soft:#1b3326; --warn:#e2ad4f; --warn-soft:#3a2f17; --crit:#ec7a70; --crit-soft:#3d2120;
-  --reuse:#62a9da; --scrap:#e5826c;
+  --insp:#4fc1b3; --reuse:#6f9ff0; --scrap:#e5826c; --loss:#f08a5d; --loss-soft:rgba(240,138,93,.16); --grid:#2b3335;
   --t-top:#6fb0dc; --t-bottom:#3d7ea5; --t-both:#a993d1; --t-other:#d7a258; --t-none:#4d5759;
   color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141819; --panel:#1c2123; --ink:#e6eae8; --muted:#97a2a6; --line:#2e3638; --soft:#232a2c;
+  --accent:#6fb0dc; --accent-ink:#0d1a22; --accent-soft:#1d3444;
+  --ok:#6cc08d; --ok-soft:#1b3326; --warn:#e2ad4f; --warn-soft:#3a2f17; --crit:#ec7a70; --crit-soft:#3d2120;
+  --insp:#4fc1b3; --reuse:#6f9ff0; --scrap:#e5826c; --loss:#f08a5d; --loss-soft:rgba(240,138,93,.16); --grid:#2b3335;
+  --t-top:#6fb0dc; --t-bottom:#3d7ea5; --t-both:#a993d1; --t-other:#d7a258; --t-none:#4d5759;
+  color-scheme:dark}
 *{box-sizing:border-box}
-[hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
-.wrap{max-width:1240px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:18px}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:12px}
 h1{margin:0;font-size:24px;font-weight:700}
 h2{margin:0;font-size:15px;font-weight:600}
@@ -69,7 +74,14 @@ button,input,select{font:inherit;color:inherit}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .seg.sm button{padding:4px 10px;font-size:12px}
 
-/* 세로 막대 차트 (누적) */
+.cv{position:relative;height:260px}
+.cv.sm{height:160px}
+.amthead{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:-6px}
+.amthead span{display:inline-flex;align-items:center;gap:6px}
+.amthead b{color:var(--ink);font-size:16px;font-weight:700}
+.cvempty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:var(--muted);font-size:13px;background:var(--panel)}
+.periodbar .range{margin-left:auto}
+/* 세로 막대 차트 */
 .chart{display:flex;flex-direction:column;gap:4px}
 .cols{display:flex;gap:6px;align-items:flex-end;height:170px;border-bottom:1px solid var(--line);padding-top:18px;overflow-x:auto}
 .col{flex:1 0 40px;max-width:72px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:2px}
@@ -125,8 +137,8 @@ tfoot td{font-weight:700;background:var(--soft)}
 .formmsg{font-size:13px;min-height:1.2em}
 .formmsg.err{color:var(--crit)} .formmsg.warn{color:var(--warn)} .formmsg.ok{color:var(--ok)}
 .formfoot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
-.pricegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px 14px;max-height:360px;overflow:auto;padding-right:4px}
-.prow{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px;align-items:center;font-size:13px}
+.pricegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px 14px;max-height:360px;overflow:auto;padding-right:4px}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:8px;align-items:center;font-size:13px}
 .prow span{font-family:var(--f-mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .prow input{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:5px 8px;text-align:right;width:100%}
 .prow input.missing{border-color:var(--warn)}
@@ -146,7 +158,7 @@ tfoot td{font-weight:700;background:var(--soft)}
   .filters input[type=search]{width:100%}
 }
 </style>
-</head><body>
+
 <div class="wrap">
   <header>
     <h1>자주검사 현황</h1>
@@ -160,46 +172,41 @@ tfoot td{font-weight:700;background:var(--soft)}
     <button class="btn" id="fReset" type="button">필터 초기화</button>
   </section>
 
+  <section class="periodbar" aria-label="기간 선택">
+    <div class="seg" id="seg" role="group" aria-label="기간 단위">
+      <button type="button" data-mode="day" aria-pressed="true">일별</button>
+      <button type="button" data-mode="week" aria-pressed="false">주별</button>
+      <button type="button" data-mode="month" aria-pressed="false">월별</button>
+      <button type="button" data-mode="all" aria-pressed="false">전체</button>
+    </div>
+    <span class="divider"></span>
+    <div class="pick" id="pickY"><label for="selY">년도</label><select id="selY"></select></div>
+    <div class="pick" id="pickM"><label for="selM">월</label><select id="selM"></select></div>
+    <div class="pick" id="pickW"><label for="selW">주</label><select id="selW"></select></div>
+    <div class="pick" id="pickD" hidden><label for="selD">일</label><select id="selD"></select></div>
+    <span class="range" id="range"></span>
+  </section>
+
   <section class="kpis" id="kpis" aria-label="수량·금액 요약"></section>
 
   <section class="grid2">
     <div class="panel">
-      <div class="phead">
-        <div><h2>재사용 및 폐기 수량</h2><div class="sub">막대 위 숫자 = 재사용 + 폐기 (EA)</div></div>
-        <div class="seg sm" id="chartSeg" role="group" aria-label="그래프 단위">
-          <button type="button" data-unit="day" aria-pressed="false">일자</button>
-          <button type="button" data-unit="week" aria-pressed="true">주차</button>
-        </div>
-      </div>
-      <div class="legend-inline"><span><i class="sw" style="background:var(--reuse)"></i>재사용</span><span><i class="sw" style="background:var(--scrap)"></i>폐기</span></div>
-      <div id="qtyChart" class="chart"></div>
+      <div><h2 id="qtyTitle">재사용 및 폐기 수량</h2></div>
+      <div class="legend-inline"><span><i class="sw" style="background:var(--insp)"></i>검사수량</span><span><i class="sw" style="background:var(--reuse)"></i>재사용</span><span><i class="sw" style="background:var(--scrap)"></i>폐기</span></div>
+      <div class="cv" style="height:380px"><canvas id="qtyCanvas" role="img" aria-label="재사용 및 폐기 수량 막대 그래프"></canvas></div>
     </div>
     <div class="panel">
-      <div class="phead">
-        <div><h2>재사용 및 폐기 금액</h2><div class="sub">수량 × 제품코드별 단가 (원) · 단가가 없는 코드는 빠짐</div></div>
-      </div>
-      <div class="legend-inline"><span><i class="sw" style="background:var(--reuse)"></i>재사용</span><span><i class="sw" style="background:var(--scrap)"></i>폐기</span></div>
-      <div id="amtChart" class="chart"></div>
+      <div><h2 id="amtTitle">재사용 및 폐기 금액</h2><div class="sub" id="amtSub" hidden>금액 = 수량 × 단가(코드·색상·부품 일치)</div></div>
+      <div class="amthead"><span><i class="sw" style="background:var(--reuse)"></i>재사용 금액</span><span>합계 <b class="num" id="reuseTot">–</b></span></div>
+      <div class="cv sm"><canvas id="reuseCanvas" role="img" aria-label="재사용 금액 꺾은선 그래프"></canvas><div class="cvempty" id="amtEmpty" hidden>아직 단가가 없습니다. 검사 기록 위 “단가 입력”에서 코드·색상·부품별 단가를 넣으면 금액 그래프가 나옵니다.</div></div>
+      <div class="amthead"><span><i class="sw" style="background:var(--scrap)"></i>폐기 금액</span><span>합계 <b class="num" id="scrapTot">–</b></span></div>
+      <div class="cv sm"><canvas id="scrapCanvas" role="img" aria-label="폐기 금액 꺾은선 그래프"></canvas></div>
     </div>
   </section>
 
-  <section class="grid3">
-    <div class="panel">
-      <div><h2>검사일별 불량률</h2><div class="sub">막대 위 숫자 = 불량수 ÷ 검사수량 · 최근 14일</div></div>
-      <div id="daily"></div>
-    </div>
-    <div class="panel">
-      <div><h2>불량 위치 (이물질/기타)</h2><div class="sub">유형 칸 합계 기준 · 유형 미기재분은 '미분류'</div></div>
-      <div id="types"></div>
-    </div>
-    <div class="panel">
-      <div><h2>제품코드별 불량률</h2><div class="sub">높은 순 상위 8개 · 오른쪽 숫자 = 불량/검사</div></div>
-      <div id="bycode" class="rank"></div>
-    </div>
-  </section>
 
   <section class="formpanel" id="pricePanel" hidden aria-label="단가 입력">
-    <div class="toolbar"><h2>제품코드별 단가 (원/EA)</h2><span class="note" id="priceNote"></span></div>
+    <div class="toolbar"><h2>제품코드 · 색상 · 부품별 단가 (원/EA)</h2><span class="note" id="priceNote"></span></div>
     <div class="pricegrid" id="priceGrid"></div>
     <div class="formfoot">
       <div class="formmsg" id="priceMsg" role="status"></div>
@@ -253,27 +260,13 @@ tfoot td{font-weight:700;background:var(--soft)}
       </div>
     </div>
 
-    <div class="periodbar" aria-label="기간 선택">
-      <div class="seg" id="seg" role="group" aria-label="기간 단위">
-        <button type="button" data-mode="day" aria-pressed="false">일자별</button>
-        <button type="button" data-mode="week" aria-pressed="true">주차별</button>
-        <button type="button" data-mode="all" aria-pressed="false">전체</button>
-      </div>
-      <span class="divider"></span>
-      <div class="pick" id="pickY"><label for="selY">년도</label><select id="selY"></select></div>
-      <div class="pick" id="pickM"><label for="selM">월</label><select id="selM"></select></div>
-      <div class="pick" id="pickW"><label for="selW">주</label><select id="selW"></select></div>
-      <div class="pick" id="pickD" hidden><label for="selD">일</label><select id="selD"></select></div>
-      <span class="range" id="range"></span>
-    </div>
-
     <div class="tablebox">
       <table>
         <thead>
-          <tr class="grp"><th colspan="9"></th><th colspan="3">불량 (이물질)</th><th></th><th colspan="2"></th></tr>
+          <tr class="grp"><th colspan="11"></th><th colspan="3">불량 (이물질)</th><th></th><th colspan="2"></th></tr>
           <tr>
             <th>검사일</th><th>제품코드</th><th>부품</th><th>색상</th><th>포장일</th>
-            <th class="r">검사수량</th><th class="r">총 불량</th><th class="r">재사용</th><th class="r">폐기</th>
+            <th class="r">검사수량</th><th class="r">총 불량</th><th class="r">재사용</th><th class="r">재사용 금액</th><th class="r">폐기</th><th class="r">폐기 금액</th>
             <th class="r">윗면</th><th class="r">아랫면</th><th class="r">양면</th><th class="r">기타</th>
             <th class="c">불량률</th><th></th>
           </tr>
@@ -290,6 +283,7 @@ tfoot td{font-weight:700;background:var(--soft)}
   <datalist id="dlCode"></datalist>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 (function(){
   const $ = id => document.getElementById(id);
@@ -305,6 +299,10 @@ tfoot td{font-weight:700;background:var(--soft)}
   const scrapOf = r => Math.max(0, n(r.defects) - n(r.reuse));
 
   let rows = [], prices = {}, editingId = null, armedDelete = null;
+  // 단가는 제품코드·색상·부품이 모두 같은 품목에만 적용
+  const pkey = r => [String(r.code||'').trim().toUpperCase(), String(r.color||'').trim(), String(r.part||'').trim()].join('|');
+  const plabel = k => k.split('|').map(x => x || '(없음)').join(' · ');
+  const priceOf = r => prices[pkey(r)] || 0;
   const setStatus = t => { $('status').textContent = t; };
 
   // ---------- 날짜 · 주차 ----------
@@ -332,51 +330,76 @@ tfoot td{font-weight:700;background:var(--soft)}
   $('fReset').addEventListener('click', () => { ['fPart','fColor','fQ'].forEach(id => $(id).value=''); F.part=F.color=F.q=''; render(); });
   const base = () => rows.filter(r => (!F.part || r.part === F.part) && (!F.color || r.color === F.color) && (!F.q || String(r.code||'').toUpperCase().includes(F.q)));
 
-  // ---------- 검사 기록 기간 선택 (년도 · 월 · 주 / 일) ----------
-  const P = { mode:'week', y:0, m:0, w:'', d:'' };
-  $('seg').addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (!b) return; P.mode = b.dataset.mode;
-    $('seg').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); renderPeriod(); renderTable(); });
-  $('selY').addEventListener('change', () => { P.y = +$('selY').value; P.w = P.d = ''; renderPeriod(); renderTable(); });
-  $('selM').addEventListener('change', () => { P.m = +$('selM').value; P.w = P.d = ''; renderPeriod(); renderTable(); });
-  $('selW').addEventListener('change', () => { P.w = $('selW').value; renderPeriod(); renderTable(); });
-  $('selD').addEventListener('change', () => { P.d = $('selD').value; renderPeriod(); renderTable(); });
+  // ---------- 기간 선택 (일별 · 주별 · 월별 · 전체) ----------
+  // 일별: 년도·월·일 / 주별: 년도·월·주 / 월별: 년도·월 → 요약 · 검사 기록은 고른 그 날·주·월
+  // 그래프는 고른 날이 속한 주(일별), 고른 달의 주차(주별), 고른 해의 달(월별)을 칸으로 보여 줌
+  const P = { mode:'day', y:0, m:0, w:'', d:'' };
+  function setMode(m){ P.mode = m; $('seg').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.mode === m))); }
+  $('seg').addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (!b) return; setMode(b.dataset.mode); render(); });
+  $('selY').addEventListener('change', () => { P.y = +$('selY').value; P.w = P.d = ''; render(); });
+  $('selM').addEventListener('change', () => { P.m = +$('selM').value; P.w = P.d = ''; render(); });
+  $('selW').addEventListener('change', () => { P.w = $('selW').value; render(); });
+  $('selD').addEventListener('change', () => { P.d = $('selD').value; render(); });
 
   function latestDate(){ return rows.reduce((a,r) => r.date && r.date > a ? r.date : a, ''); }
-  function initPeriod(){ const d = latestDate() || ymd(new Date()); const wi = weekInfo(weekStart(d)); P.y = wi.y; P.m = wi.m; P.w = weekStart(d); P.d = d; }
+  function initPeriod(){ const d = latestDate() || ymd(new Date()); P.y = +d.slice(0,4); P.m = +d.slice(5,7); P.d = d; P.w = weekStart(d); }
+  const ymKey = () => `${P.y}-${pad(P.m)}`;
 
   function renderPeriod(){
-    const all = P.mode === 'all';
-    $('pickY').hidden = $('pickM').hidden = all;
-    $('pickW').hidden = all || P.mode !== 'week';
-    $('pickD').hidden = all || P.mode !== 'day';
+    const m = P.mode;
+    $('pickY').hidden = m === 'all';
+    $('pickM').hidden = m === 'all';
+    $('pickW').hidden = m !== 'week';
+    $('pickD').hidden = m !== 'day';
     const years = new Set(rows.map(r => r.date && +r.date.slice(0,4)).filter(Boolean)); years.add(new Date().getFullYear()); if (P.y) years.add(P.y);
+    const mc = {}; base().forEach(r => { if (r.date){ const k = r.date.slice(0,7); mc[k] = (mc[k]||0) + 1; } });
     $('selY').innerHTML = [...years].sort().map(y => `<option value="${y}" ${y===P.y?'selected':''}>${y}년</option>`).join('');
-    $('selM').innerHTML = Array.from({length:12}, (_,i) => i+1).map(m => `<option value="${m}" ${m===P.m?'selected':''}>${m}월</option>`).join('');
-    const counts = {}; base().forEach(r => { if (r.date) counts[r.date] = (counts[r.date]||0) + 1; });
-    if (P.mode === 'week'){
+    $('selM').innerHTML = Array.from({length:12}, (_,i) => i+1).map(x => { const c = mc[`${P.y}-${pad(x)}`];
+      return `<option value="${x}" ${x===P.m?'selected':''}>${x}월${m==='month' && c ? ` (${c}건)` : ''}</option>`; }).join('');
+    if (m === 'week'){
+      const counts = {}; base().forEach(r => { if (r.date){ const k = weekStart(r.date); counts[k] = (counts[k]||0) + 1; } });
       const ws = weeksOfMonth(P.y, P.m);
-      if (!ws.some(x => x.ws === P.w)){ const withData = ws.filter(x => Object.keys(counts).some(d => weekStart(d) === x.ws)); P.w = (withData.pop() || ws[0] || {}).ws || ''; }
-      $('selW').innerHTML = ws.map(x => { const c = Object.entries(counts).filter(([d]) => weekStart(d) === x.ws).reduce((a,[,v]) => a+v, 0);
-        return `<option value="${x.ws}" ${x.ws===P.w?'selected':''}>${x.w}주${c?` (${c}건)`:''}</option>`; }).join('');
-      $('range').innerHTML = P.w ? `<b>${weekLabel(P.w)}</b> · ${md(P.w)} ~ ${md(weekEnd(P.w))}` : '';
-    } else if (P.mode === 'day'){
-      const last = new Date(P.y, P.m, 0).getDate(); const days = Array.from({length:last}, (_,i) => `${P.y}-${pad(P.m)}-${pad(i+1)}`);
+      if (!ws.some(x => x.ws === P.w)){ const withData = ws.filter(x => counts[x.ws]); P.w = (withData.pop() || ws[0] || {}).ws || ''; }
+      $('selW').innerHTML = ws.map(x => `<option value="${x.ws}" ${x.ws===P.w?'selected':''}>${x.w}주${counts[x.ws]?` (${counts[x.ws]}건)`:''}</option>`).join('');
+    }
+    if (m === 'day'){
+      const counts = {}; base().forEach(r => { if (r.date) counts[r.date] = (counts[r.date]||0) + 1; });
+      const last = new Date(P.y, P.m, 0).getDate(), days = Array.from({length:last}, (_,i) => `${ymKey()}-${pad(i+1)}`);
       if (!days.includes(P.d)){ const withData = days.filter(d => counts[d]); P.d = withData.pop() || days[0]; }
       $('selD').innerHTML = days.map(d => `<option value="${d}" ${d===P.d?'selected':''}>${+d.slice(8)}일 (${DOW[toDate(d).getDay()]})${counts[d]?` · ${counts[d]}건`:''}</option>`).join('');
-      $('range').innerHTML = `<b>${md(P.d)} (${DOW[toDate(P.d).getDay()]})</b>`;
-    } else $('range').innerHTML = '<b>전체 기간</b>';
+    }
+  }
+  function periodTitle(){
+    if (P.mode === 'day') return `${P.y}년 ${P.m}월 ${+P.d.slice(8)}일 (${DOW[toDate(P.d).getDay()]})`;
+    if (P.mode === 'week'){ const wi = weekInfo(P.w); return `${wi.y}년 ${wi.m}월 ${wi.w}주 (${md(P.w)}~${md(weekEnd(P.w))})`; }
+    if (P.mode === 'month') return `${P.y}년 ${P.m}월`;
+    return '전체 기간';
+  }
+  // 그래프 범위 제목
+  function chartTitle(){
+    if (P.mode === 'day') return `${weekLabel(weekStart(P.d))} 일별`;
+    if (P.mode === 'week') return `${P.y}년 ${P.m}월 주별`;
+    if (P.mode === 'month') return `${P.y}년 월별`;
+    return '전체 기간 월별';
   }
   function periodRows(){
     const b = base();
-    if (P.mode === 'week') return b.filter(r => r.date && weekStart(r.date) === P.w);
     if (P.mode === 'day') return b.filter(r => r.date === P.d);
+    if (P.mode === 'week') return b.filter(r => r.date && weekStart(r.date) === P.w);
+    if (P.mode === 'month') return b.filter(r => r.date && r.date.startsWith(ymKey()));
     return b;
   }
-
-  // ---------- 그래프 단위 ----------
-  let unit = 'week';
-  $('chartSeg').addEventListener('click', e => { const b = e.target.closest('[data-unit]'); if (!b) return; unit = b.dataset.unit;
-    $('chartSeg').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); renderCharts(base()); });
+  // 그래프 가로축 칸
+  function buckets(){
+    if (P.mode === 'day') return Array.from({length:5}, (_,i) => { const t = toDate(weekStart(P.d)); /* 월~금 */ t.setDate(t.getDate()+i); const d = ymd(t);
+      return {label:`${t.getDate()}(${DOW[t.getDay()]})`, match:r => r.date === d, sel:d === P.d, select:() => { P.d = d; P.y = +d.slice(0,4); P.m = +d.slice(5,7); }}; });
+    if (P.mode === 'week') return weeksOfMonth(P.y, P.m).map(x => ({label:`${x.w}주 (${md(x.ws)}~)`, match:r => r.date && weekStart(r.date) === x.ws, sel:x.ws === P.w, select:() => { P.w = x.ws; }}));
+    if (P.mode === 'month') return Array.from({length:12}, (_,i) => { const k = `${P.y}-${pad(i+1)}`; return {label:`${i+1}월`, match:r => r.date && r.date.startsWith(k), sel:i+1 === P.m, select:() => { P.m = i+1; }}; });
+    const ds = rows.map(r => r.date).filter(Boolean).sort(); if (!ds.length) return [];
+    const out = []; let y = +ds[0].slice(0,4), mo = +ds[0].slice(5,7); const ey = +ds[ds.length-1].slice(0,4), em = +ds[ds.length-1].slice(5,7);
+    while (y < ey || (y === ey && mo <= em)){ const k = `${y}-${pad(mo)}`, yy = y, mm = mo; out.push({label:`${String(y).slice(2)}년 ${mo}월`, match:r => r.date && r.date.startsWith(k), sel:false, select:() => { setMode('month'); P.y = yy; P.m = mm; }}); if (++mo > 12){ mo = 1; y++; } }
+    return out;
+  }
 
   // ---------- render ----------
   function fillSelect(sel, values){ const cur = sel.value;
@@ -387,15 +410,16 @@ tfoot td{font-weight:700;background:var(--soft)}
   function render(){
     fillSelect($('fPart'), uniq('part')); fillSelect($('fColor'), uniq('color'));
     $('dlCode').innerHTML = uniq('code').map(c => `<option value="${esc(c)}">`).join('');
-    const b = base();
-    renderKpis(b); renderCharts(b); renderDaily(b); renderTypes(b); renderByCode(b);
-    renderPeriod(); renderTable();
+    renderPeriod();
+    const list = periodRows(), s = sums(list), days = new Set(list.map(r => r.date)).size;
+    $('range').innerHTML = `<b>${periodTitle()}</b> · ${days}일 · ${list.length}건 · 검사 ${fmtN(s.qty)}EA`;
+    renderKpis(list); renderCharts(base()); renderTable(list);
   }
 
   function sums(list){
     const s = {qty:0,def:0,reuse:0,scrap:0,top:0,bottom:0,both:0,other:0,reuseAmt:0,scrapAmt:0,noPrice:new Set()};
     list.forEach(r => { s.qty+=n(r.qty); s.def+=n(r.defects); s.reuse+=n(r.reuse); s.scrap+=scrapOf(r); s.top+=n(r.top); s.bottom+=n(r.bottom); s.both+=n(r.both); s.other+=n(r.other);
-      const p = prices[r.code]; if (p > 0){ s.reuseAmt += n(r.reuse)*p; s.scrapAmt += scrapOf(r)*p; } else if (n(r.defects)) s.noPrice.add(r.code); });
+      const p = priceOf(r); if (p > 0){ s.reuseAmt += n(r.reuse)*p; s.scrapAmt += scrapOf(r)*p; } else if (n(r.defects)) s.noPrice.add(pkey(r)); });
     return s;
   }
 
@@ -403,7 +427,7 @@ tfoot td{font-weight:700;background:var(--soft)}
     const s = sums(list);
     const sw = c => `<i class="sw" style="background:var(--${c})"></i>`;
     const k = (label, v, unitTxt, sub) => `<div class="kpi"><span class="k">${label}</span><span class="v num">${v}<small>${unitTxt}</small></span><span class="s">${sub}</span></div>`;
-    const priceSub = s.noPrice.size ? `단가 없는 코드 ${s.noPrice.size}개 제외` : '전 코드 단가 반영';
+    const priceSub = s.noPrice.size ? `단가 없는 품목 ${s.noPrice.size}개 제외` : '전 품목 단가 반영';
     $('kpis').innerHTML =
       k('검사 수량', fmtN(s.qty), 'EA', `${list.length}건 · 불량 ${fmtN(s.def)} (${fmtPct(pct(s.def,s.qty))})`) +
       k(`${sw('scrap')}폐기 수량`, fmtN(s.scrap), 'EA', `검사수량 대비 ${fmtPct(pct(s.scrap,s.qty))}`) +
@@ -412,27 +436,87 @@ tfoot td{font-weight:700;background:var(--soft)}
       k(`${sw('reuse')}재사용 금액`, fmtWon(s.reuseAmt), '원', priceSub);
   }
 
-  function groupBy(list, keyFn){ const g = {}; list.forEach(r => { if (!r.date) return; const k = keyFn(r); (g[k] ||= []).push(r); }); return g; }
-  function stackChart(el, groups, keys, labelFn, valFn, fmt){
-    if (!keys.length){ el.innerHTML = '<div class="empty">표시할 기록이 없습니다.</div>'; return; }
-    const vals = keys.map(k => valFn(groups[k]));
-    const max = Math.max(1, ...vals.map(v => v.reuse + v.scrap));
-    el.innerHTML =
-      `<div class="cols">${keys.map((k,i) => { const v = vals[i], tot = v.reuse + v.scrap;
-        return `<div class="col" title="${labelFn(k).replace('<br>',' ')} · 재사용 ${fmt(v.reuse)} / 폐기 ${fmt(v.scrap)}"><b class="num">${fmt(tot)}</b>
-          <span class="stackbar" style="height:${(tot/max*100).toFixed(1)}%"><i style="height:${tot?(v.reuse/tot*100).toFixed(1):0}%;background:var(--reuse)"></i><i style="height:${tot?(v.scrap/tot*100).toFixed(1):0}%;background:var(--scrap)"></i></span></div>`; }).join('')}</div>` +
-      `<div class="collbl">${keys.map(k => `<span class="num">${labelFn(k)}</span>`).join('')}</div>`;
-  }
+  // ---------- 재사용·폐기 그래프 (수량: 막대 / 금액: 꺾은선) ----------
+  let qtyChart = null, reuseChart = null, scrapChart = null;
+  const cssv = k => getComputedStyle(document.documentElement).getPropertyValue(k).trim();
+  const FONT = '"IBM Plex Sans KR","Malgun Gothic",sans-serif';
+  function wonUnit(max){ return max >= 1e6 ? {d:1e6, u:'백만원', f:1} : max >= 1e4 ? {d:1e4, u:'만원', f:0} : {d:1, u:'원', f:0}; }
+  // 막대·점 위에 숫자를 직접 그림
+  const valueLabels = {
+    id:'valueLabels',
+    afterDatasetsDraw(chart){
+      const o = chart.options.plugins.valueLabels; if (!o) return;
+      const {ctx} = chart; ctx.save(); ctx.textAlign = 'center';
+      if (o.kind === 'qty'){
+        // 검사수량 · 재사용 · 폐기 막대마다 위에 숫자
+        chart.data.datasets.forEach((ds, di) => { const m = chart.getDatasetMeta(di); if (m.hidden) return;
+          ds.data.forEach((v, i) => { if (!v) return; const b = m.data[i];
+            ctx.font = `700 12px ${FONT}`; ctx.fillStyle = o.ink; ctx.textBaseline = 'bottom'; ctx.fillText(fmtN(v), b.x, b.y - 4); }); });
+      } else {
+        const m = chart.getDatasetMeta(0); ctx.font = `700 12px ${FONT}`; ctx.fillStyle = o.ink; ctx.textBaseline = 'bottom';
+        chart.data.datasets[0].data.forEach((v, i) => { if (v == null || !o.has[i]) return; const p = m.data[i]; ctx.fillText(v.toFixed(o.f), p.x, p.y - 8); });
+      }
+      ctx.restore();
+    }
+  };
   function renderCharts(list){
-    const keyFn = unit === 'week' ? (r => weekStart(r.date)) : (r => r.date);
-    const g = groupBy(list, keyFn);
-    const keys = Object.keys(g).sort().slice(unit === 'week' ? -10 : -14);
-    const labelFn = unit === 'week' ? (k => { const wi = weekInfo(k); return `${wi.m}월<br>${wi.w}주`; }) : (k => md(k));
-    stackChart($('qtyChart'), g, keys, labelFn, rs => ({reuse: rs.reduce((a,r)=>a+n(r.reuse),0), scrap: rs.reduce((a,r)=>a+scrapOf(r),0)}), fmtN);
-    const s = sums(list);
-    if (Object.keys(prices).length === 0){ $('amtChart').innerHTML = '<div class="empty">아직 단가가 없습니다. 검사 기록 위 “단가 입력”에서 제품코드별 단가를 넣으면 금액 그래프가 나옵니다.</div>'; return; }
-    stackChart($('amtChart'), g, keys, labelFn, rs => ({reuse: rs.reduce((a,r)=>a+n(r.reuse)*(prices[r.code]||0),0), scrap: rs.reduce((a,r)=>a+scrapOf(r)*(prices[r.code]||0),0)}), fmtWon);
-    if (s.noPrice.size) $('amtChart').insertAdjacentHTML('beforeend', `<div class="note">단가 없는 코드 ${s.noPrice.size}개는 금액에서 빠졌습니다.</div>`);
+    const bk = buckets(), t = chartTitle();
+    $('qtyTitle').textContent = `${t} 검사 · 재사용 · 폐기 수량`;
+    $('amtTitle').textContent = `${t} 재사용 및 폐기 금액`;
+    const groups = bk.map(b => list.filter(b.match));
+    const reuse = groups.map(g => g.reduce((a,r) => a + n(r.reuse), 0));
+    const scrap = groups.map(g => g.reduce((a,r) => a + scrapOf(r), 0));
+    const insp = groups.map(g => g.reduce((a,r) => a + n(r.qty), 0));
+    const amt = groups.map(g => g.reduce((a,r) => a + (n(r.reuse) + scrapOf(r)) * priceOf(r), 0));
+    const has = groups.map(g => g.length > 0);
+    const ink = cssv('--ink'), muted = cssv('--muted'), grid = cssv('--grid');
+    if (!window.Chart){ $('qtyTitle').textContent += ' (그래프 라이브러리를 불러오지 못했습니다)'; return; }
+    // 막대·점을 누르면 그 날·주·월이 선택되어 위 요약과 검사 기록이 바뀜
+    const pick = (e, chart) => { const el = chart.getElementsAtEventForMode(e, 'index', {intersect:false}, true)[0]; if (!el || !bk[el.index]) return; bk[el.index].select(); render(); };
+    const hover = (e, els, chart) => { const el = chart.getElementsAtEventForMode(e, 'index', {intersect:false}, true); chart.canvas.style.cursor = el.length && has[el[0].index] ? 'pointer' : 'default'; };
+    const dim = c => c; // 선택해도 막대 색은 그대로
+    const common = { responsive:true, maintainAspectRatio:false, animation:false, onClick:pick, onHover:hover,
+      plugins:{ legend:{display:false}, tooltip:{ mode:'index', intersect:false } },
+      scales:{ x:{ grid:{color:grid}, ticks:{color:muted, font:{family:FONT, size:11}, maxRotation:0, autoSkip:false} },
+               y:{ beginAtZero:true, grid:{color:grid}, border:{display:false}, ticks:{color:muted, font:{family:FONT, size:11}} } } };
+    const maxTot = Math.max(1, ...insp, ...reuse, ...scrap);
+    qtyChart?.destroy();
+    qtyChart = new Chart($('qtyCanvas'), { type:'bar', plugins:[valueLabels],
+      data:{ labels:bk.map(b => b.label), datasets:[
+        {label:'검사수량', data:insp, backgroundColor:cssv('--insp'), borderRadius:{topLeft:3, topRight:3}, maxBarThickness:140, categoryPercentage:0.9, barPercentage:0.95},
+        {label:'재사용', data:reuse, backgroundColor:cssv('--reuse'), borderRadius:{topLeft:3, topRight:3}, maxBarThickness:140, categoryPercentage:0.9, barPercentage:0.95},
+        {label:'폐기', data:scrap, backgroundColor:cssv('--scrap'), borderRadius:{topLeft:3, topRight:3}, maxBarThickness:140, categoryPercentage:0.9, barPercentage:0.95}] },
+      options:{ ...common, layout:{padding:{top:4}},
+        plugins:{ ...common.plugins, valueLabels:{kind:'qty', ink, muted, reuse:cssv('--reuse'), scrap:cssv('--scrap')},
+          tooltip:{ ...common.plugins.tooltip, callbacks:{ label: x => ` ${x.dataset.label} ${fmtN(x.parsed.y)} EA` } } },
+        scales:{ x:common.scales.x, y:{...common.scales.y, suggestedMax:maxTot * 1.12} } } });
+
+    // 재사용 금액 · 폐기 금액 그래프를 따로 그림 (각각 기간 합계 표시)
+    const noPrice = Object.keys(prices).length === 0;
+    $('amtEmpty').hidden = !noPrice;
+    $('scrapCanvas').parentElement.hidden = noPrice;
+    const s = sums(groups.flat()), missing = s.noPrice.size;
+    $('reuseTot').textContent = noPrice ? '–' : `${fmtN(s.reuseAmt)}원`;
+    $('scrapTot').textContent = noPrice ? '–' : `${fmtN(s.scrapAmt)}원`;
+    $('amtSub').textContent = `금액 = 수량 × 단가(코드·색상·부품 일치)` + (missing ? ` · 단가 없는 품목 ${missing}개 제외` : '');
+    reuseChart?.destroy(); scrapChart?.destroy();
+    if (noPrice) return;
+    const reuseAmt = groups.map(g => g.reduce((a,r) => a + n(r.reuse) * priceOf(r), 0));
+    const scrapAmt = groups.map(g => g.reduce((a,r) => a + scrapOf(r) * priceOf(r), 0));
+    const line = (canvas, vals, color) => {
+      const U = wonUnit(Math.max(...vals, 0)), maxV = Math.max(...vals, 0) / U.d;
+      return new Chart(canvas, { type:'line', plugins:[valueLabels],
+        data:{ labels:bk.map(b => b.label), datasets:[{ data:vals.map((v,i) => has[i] ? v / U.d : null),
+          borderColor:color, backgroundColor:color + '22', fill:'origin', tension:0.35, spanGaps:true,
+          pointRadius:bk.map(b => b.sel ? 7 : 4), pointHoverRadius:7, pointBackgroundColor:color, pointBorderColor:color, borderWidth:2 }] },
+        options:{ ...common, layout:{padding:{top:18}},
+          plugins:{ ...common.plugins, valueLabels:{kind:'amt', ink, f:U.f, has},
+            tooltip:{ ...common.plugins.tooltip, callbacks:{ label: x => ` ${fmtN(vals[x.dataIndex])}원` } } },
+          scales:{ x:common.scales.x, y:{...common.scales.y, suggestedMax: maxV ? maxV * 1.3 : 1,
+            ticks:{...common.scales.y.ticks, maxTicksLimit:4, callback: v => `${+v.toFixed(2)}${U.u}`}} } } });
+    };
+    reuseChart = line($('reuseCanvas'), reuseAmt, cssv('--reuse'));
+    scrapChart = line($('scrapCanvas'), scrapAmt, cssv('--scrap'));
   }
 
   function renderDaily(list){
@@ -475,35 +559,38 @@ tfoot td{font-weight:700;background:var(--soft)}
     return out;
   }
 
-  function renderTable(){
-    const list = periodRows().slice().sort((a,b) => (b.date||'').localeCompare(a.date||'') || (a.seq||0)-(b.seq||0));
+  function renderTable(src){
+    const list = (src || periodRows()).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'') || (a.seq||0)-(b.seq||0));
     $('count').textContent = `${list.length}건` + (list.length !== rows.length ? ` / 전체 ${rows.length}건` : '');
     if (!list.length){
-      $('tbody').innerHTML = `<tr><td colspan="15" class="empty" style="text-align:center;padding:28px">${rows.length ? '선택한 기간에 기록이 없습니다.' : '아직 검사 기록이 없습니다. “+ 검사 기록 추가”로 첫 기록을 입력하세요.'}</td></tr>`;
+      $('tbody').innerHTML = `<tr><td colspan="17" class="empty" style="text-align:center;padding:28px">${rows.length ? '선택한 기간에 기록이 없습니다.' : '아직 검사 기록이 없습니다. “+ 검사 기록 추가”로 첫 기록을 입력하세요.'}</td></tr>`;
       $('tfoot').innerHTML = ''; return;
     }
     const z = v => n(v) ? n(v) : '<span class="dim">–</span>';
+    const won = (q, p) => p > 0 ? (q ? fmtN(q * p) : '0') : '<span class="dim" title="단가 없음">–</span>';
     $('tbody').innerHTML = list.map(r => {
       const rate = pct(n(r.defects), n(r.qty)), lv = level(rate), iss = issues(r), del = armedDelete === r._id;
       return `<tr>
         <td class="num">${fmtD(r.date)}</td><td class="mono" title="${esc(r.note)}">${esc(r.code)}</td><td>${esc(r.part)}</td><td>${esc(r.color)}</td>
         <td class="num dim">${fmtD(r.packDate)}</td>
-        <td class="r num">${n(r.qty)}</td><td class="r num"><b>${n(r.defects)}</b></td><td class="r num">${z(r.reuse)}</td><td class="r num">${z(scrapOf(r))}</td>
+        <td class="r num">${n(r.qty)}</td><td class="r num"><b>${n(r.defects)}</b></td><td class="r num">${z(r.reuse)}</td><td class="r num">${won(n(r.reuse), priceOf(r))}</td><td class="r num">${z(scrapOf(r))}</td><td class="r num">${won(scrapOf(r), priceOf(r))}</td>
         <td class="r num">${z(r.top)}</td><td class="r num">${z(r.bottom)}</td><td class="r num">${z(r.both)}</td><td class="r num">${z(r.other)}</td>
         <td class="c"><span class="pill ${lv}">${fmtPct(rate)}</span> ${iss.length ? `<span class="flag" title="${esc(iss.join(' · '))}">⚠</span>` : ''}</td>
         <td><div class="rowact"><button class="btn" data-edit="${esc(r._id)}" type="button">수정</button><button class="btn ${del?'danger':''}" data-del="${esc(r._id)}" type="button">${del?'삭제 확인':'삭제'}</button></div></td>
       </tr>`; }).join('');
     const s = sums(list);
-    $('tfoot').innerHTML = `<tr><td colspan="5">합계</td><td class="r num">${s.qty}</td><td class="r num">${s.def}</td><td class="r num">${s.reuse}</td><td class="r num">${s.scrap}</td><td class="r num">${s.top}</td><td class="r num">${s.bottom}</td><td class="r num">${s.both}</td><td class="r num">${s.other}</td><td class="c"><span class="pill ${level(pct(s.def,s.qty))}">${fmtPct(pct(s.def,s.qty))}</span></td><td></td></tr>`;
+    $('tfoot').innerHTML = `<tr><td colspan="5">합계</td><td class="r num">${s.qty}</td><td class="r num">${s.def}</td><td class="r num">${s.reuse}</td><td class="r num">${fmtN(s.reuseAmt)}</td><td class="r num">${s.scrap}</td><td class="r num">${fmtN(s.scrapAmt)}</td><td class="r num">${s.top}</td><td class="r num">${s.bottom}</td><td class="r num">${s.both}</td><td class="r num">${s.other}</td><td class="c"><span class="pill ${level(pct(s.def,s.qty))}">${fmtPct(pct(s.def,s.qty))}</span></td><td></td></tr>`;
   }
 
   // ---------- 저장: data.json(저장소 원본) + 이 브라우저의 수정본(localStorage) ----------
-  const KEY = 'self-inspection-data';
+  const KEY = 'self-inspection-data-v2';
   let remoteUpdated = '';
   const readLocal = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(_) { return null; } };
   const plainRows = () => rows.slice().sort((a,b) => (a.date||'').localeCompare(b.date||'') || (a.seq||0)-(b.seq||0)).map(r => { const o = {...r, id:r._id}; delete o._id; return o; });
+  const priceItems = () => Object.entries(prices).filter(([,v]) => v > 0).map(([k,price]) => { const [code, color, part] = k.split('|'); return {code, color, part, price}; });
+  const loadPrices = p => { prices = {}; ((p && p.items) || []).forEach(it => { if (it.price > 0) prices[pkey(it)] = it.price; }); };
   function persist(){
-    try { localStorage.setItem(KEY, JSON.stringify({updated:new Date().toISOString(), rows:plainRows(), prices})); } catch(_) {}
+    try { localStorage.setItem(KEY, JSON.stringify({updated:new Date().toISOString(), rows:plainRows(), prices:{items:priceItems()}})); } catch(_) {}
     showSource(true); render();
   }
   function showSource(local){
@@ -514,14 +601,14 @@ tfoot td{font-weight:700;background:var(--soft)}
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type})); a.download = name;
     document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
-  $('btnJson').addEventListener('click', () => saveFile('data.json', JSON.stringify({updated:new Date().toISOString(), prices, rows:plainRows()}, null, 1), 'application/json'));
+  $('btnJson').addEventListener('click', () => saveFile('data.json', JSON.stringify({updated:new Date().toISOString(), prices:{items:priceItems()}, rows:plainRows()}, null, 1), 'application/json'));
   $('btnCsv').addEventListener('click', () => {
     const list = periodRows().slice().sort((a,b) => (a.date||'').localeCompare(b.date||''));
     const head = ['검사일','제품코드','부품명','색상','포장일','검사수량','총불량수','재사용','폐기','윗면','아랫면','양면','기타','불량률(%)','단가','재사용금액','폐기금액','비고'];
     const q = v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
-    const lines = [head.join(',')].concat(list.map(r => { const p = prices[r.code] || '';
+    const lines = [head.join(',')].concat(list.map(r => { const p = priceOf(r) || '';
       return [r.date,r.code,r.part,r.color,r.packDate,n(r.qty),n(r.defects),n(r.reuse),scrapOf(r),n(r.top),n(r.bottom),n(r.both),n(r.other),(pct(n(r.defects),n(r.qty))*100).toFixed(1),p,p?n(r.reuse)*p:'',p?scrapOf(r)*p:'',r.note].map(q).join(','); }));
-    saveFile(`자주검사_${new Date().toISOString().slice(0,10)}.csv`, '﻿' + lines.join('\r\n'), 'text/csv;charset=utf-8');
+    saveFile(`자주검사_${new Date().toISOString().slice(0,10)}.csv`, '\ufeff' + lines.join('\r\n'), 'text/csv;charset=utf-8');
   });
   let resetArmed = false;
   $('btnReset').addEventListener('click', () => {
@@ -564,10 +651,11 @@ tfoot td{font-weight:700;background:var(--soft)}
     if (d.defects > d.qty) return msg('총 불량수가 검사수량보다 많습니다. 값을 확인하세요.', 'err');
     if (d.reuse > d.defects) return msg('재사용 수가 총 불량수보다 많습니다. 값을 확인하세요.', 'err');
     d.updatedAt = new Date().toISOString();
-    if (editingId){ const i = rows.findIndex(r => r._id === editingId); rows[i] = {...rows[i], ...d}; }
-    else rows.push({...d, _id:'u' + Date.now().toString(36), seq:Date.now(), createdAt:d.updatedAt});
+    if (editingId) rows = rows.map(r => r._id === editingId ? {...r, ...d} : r);
+    else rows.push({...d, _id:'l' + Date.now().toString(36), seq:Date.now(), createdAt:d.updatedAt});
+    persist();
     const warn = typed && typed !== d.defects ? ` (참고: 유형 합계 ${typed}와 총 불량 ${d.defects}이 다릅니다)` : '';
-    const wasEdit = !!editingId; editingId = null; persist();
+    const wasEdit = !!editingId; editingId = null;
     msg((wasEdit ? '수정했습니다.' : '저장했습니다. 다음 기록을 이어서 입력할 수 있습니다.') + warn, warn ? 'warn' : 'ok');
     if (!wasEdit){ ['iQty','iDef','iReuse','iTop','iBottom','iBoth','iOther','iNote'].forEach(id => $(id).value=''); $('iCode').select(); }
     else setTimeout(() => { $('formPanel').hidden = true; }, 700);
@@ -576,22 +664,22 @@ tfoot td{font-weight:700;background:var(--soft)}
   // ---------- 단가 입력 ----------
   $('btnPrice').addEventListener('click', () => {
     $('formPanel').hidden = true;
-    const codes = uniq('code');
-    $('priceGrid').innerHTML = codes.map(c => `<label class="prow"><span title="${esc(c)}">${esc(c)}</span><input type="number" min="0" inputmode="numeric" data-code="${esc(c)}" value="${prices[c] ?? ''}" placeholder="원" class="${prices[c] ? '' : 'missing'}"></label>`).join('');
-    $('priceNote').textContent = `제품코드 ${codes.length}개 · 입력됨 ${codes.filter(c => prices[c] > 0).length}개`;
+    const keys = [...new Set(rows.map(pkey))].sort();
+    $('priceGrid').innerHTML = keys.map(c => `<label class="prow"><span title="${esc(plabel(c))}">${esc(plabel(c))}</span><input type="number" min="0" inputmode="numeric" data-key="${esc(c)}" value="${prices[c] ?? ''}" placeholder="원" class="${prices[c] ? '' : 'missing'}"></label>`).join('');
+    $('priceNote').textContent = `품목 ${keys.length}개 · 입력됨 ${keys.filter(c => prices[c] > 0).length}개`;
     $('priceMsg').textContent = ''; $('pricePanel').hidden = false;
     $('pricePanel').scrollIntoView({block:'nearest', behavior:'smooth'});
   });
   $('priceClose').addEventListener('click', () => { $('pricePanel').hidden = true; });
   $('priceSave').addEventListener('click', () => {
-    const next = {};
-    $('priceGrid').querySelectorAll('input[data-code]').forEach(i => { const v = Number(i.value); if (i.value !== '' && Number.isFinite(v) && v > 0) next[i.dataset.code] = Math.round(v); });
-    prices = next; persist();
-    $('priceMsg').textContent = `단가 ${Object.keys(prices).length}개를 저장했습니다.`; $('priceMsg').className = 'formmsg ok';
+    const items = [];
+    $('priceGrid').querySelectorAll('input[data-key]').forEach(i => { const v = Number(i.value); if (i.value !== '' && Number.isFinite(v) && v > 0){ const [code, color, part] = i.dataset.key.split('|'); items.push({code, color, part, price:Math.round(v)}); } });
+    loadPrices({items}); persist();
+    $('priceMsg').textContent = `단가 ${items.length}개를 저장했습니다. (이 브라우저에만 저장 · data.json 내보내기로 공유)`; $('priceMsg').className = 'formmsg ok';
   });
 
   // ---------- 시작 ----------
-  render();
+  initPeriod(); render();
   (async () => {
     let remote = null;
     try { const res = await fetch('data.json', {cache:'no-store'}); if (res.ok) remote = await res.json(); } catch(_) {}
@@ -601,9 +689,10 @@ tfoot td{font-weight:700;background:var(--soft)}
     const src = useLocal ? local : remote;
     if (!src){ setStatus('data.json을 불러오지 못했습니다. 페이지를 웹 주소로 열었는지 확인하세요.'); return; }
     rows = (src.rows || []).map(r => { const o = {...r, _id: r.id || r._id}; delete o.id; return o; });
-    prices = src.prices || {};
+    loadPrices(src.prices);
     initPeriod(); showSource(useLocal); render();
   })();
 })();
 </script>
+
 </body></html>
