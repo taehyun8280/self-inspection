@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-09T13:00:00Z",
+ "updated": "2026-11-12T09:00:00Z",
  "prices": {
   "items": [
    {
@@ -655,6 +655,12 @@
     "color": "WW",
     "part": "윗판",
     "price": 3812
+   },
+   {
+    "code": "ISJ60DR00A",
+    "color": "SO",
+    "part": "상판",
+    "price": 3876
    },
    {
     "code": "MCICAB260243",
@@ -2899,7 +2905,8 @@
   {
    "both": 0,
    "bottom": 3,
-   "code": "US60DR00A",
+   "code": "ISJ60DR00A",
+   "codeFixedFrom": "US60DR00A",
    "color": "SO",
    "date": "2026-11-05",
    "defects": 3,
