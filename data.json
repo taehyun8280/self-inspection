@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-12T14:00:00Z",
+ "updated": "2026-11-12T14:30:00Z",
  "prices": {
   "items": [
    {
@@ -943,6 +943,12 @@
     "color": "WW",
     "part": "측판R",
     "price": 10801
+   },
+   {
+    "code": "MCIWAC260181",
+    "color": "WW",
+    "part": "이동선반(대)R",
+    "price": 1685
    },
    {
     "code": "MCIWAC260181",
@@ -5485,7 +5491,7 @@
   {
    "both": 0,
    "bottom": 9,
-   "code": "MCIWAC260180",
+   "code": "MCIWAC260181",
    "color": "WW",
    "createdAt": "2026-11-12T12:00:00Z",
    "date": "2026-11-11",
@@ -5498,6 +5504,7 @@
    "reuse": 9,
    "seq": 3077,
    "top": 0,
+   "codeFixedFrom": "MCIWAC260180",
    "id": "s1112-p08r07"
   },
   {
