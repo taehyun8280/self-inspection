@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-19T09:30:00Z",
+ "updated": "2026-11-19T10:30:00Z",
  "prices": {
   "items": [
    {
@@ -195,13 +195,13 @@
     "price": 26721
    },
    {
-    "code": "CRN1118",
+    "code": "CRN1114Z",
     "color": "WW",
     "part": "앞가림판",
-    "price": 5708
+    "price": 4944
    },
    {
-    "code": "CRN1118Z",
+    "code": "CRN1118",
     "color": "WW",
     "part": "앞가림판",
     "price": 5708
@@ -7303,7 +7303,7 @@
   },
   {
    "date": "2026-11-18",
-   "code": "CRN1118Z",
+   "code": "CRN1114Z",
    "part": "앞가림판",
    "color": "WW",
    "packDate": "2026-11-19",
@@ -7317,6 +7317,7 @@
    "note": "스캔(11/19) 2쪽 7번 · 코드 CRN11HZ로 적힘",
    "seq": 8017,
    "createdAt": "2026-11-19T09:00:00Z",
+   "codeFixedFrom": "CRN1118Z",
    "id": "s1119-p02r07"
   },
   {
