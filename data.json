@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-20T09:00:00Z",
+ "updated": "2026-11-20T11:00:00Z",
  "prices": {
   "items": [
    {
@@ -225,6 +225,12 @@
     "price": 28025
    },
    {
+    "code": "DSAC0185B",
+    "color": "FK",
+    "part": "뒷판",
+    "price": 17887
+   },
+   {
     "code": "DSAD0012",
     "color": "FK",
     "part": "상판",
@@ -328,6 +334,12 @@
    },
    {
     "code": "DSAD0412H",
+    "color": "ML",
+    "part": "상판",
+    "price": 7570
+   },
+   {
+    "code": "DSAD0412H",
     "color": "WW",
     "part": "상판",
     "price": 7084
@@ -417,6 +429,48 @@
     "price": 3377
    },
    {
+    "code": "DSBC0163B",
+    "color": "FK",
+    "part": "뒷판L",
+    "price": 8006
+   },
+   {
+    "code": "DSBC0163B",
+    "color": "FK",
+    "part": "뒷판R",
+    "price": 8006
+   },
+   {
+    "code": "DSBC0163B",
+    "color": "FK",
+    "part": "측판L",
+    "price": 3453
+   },
+   {
+    "code": "DSBC0163B",
+    "color": "FK",
+    "part": "측판R",
+    "price": 3372
+   },
+   {
+    "code": "DSBC0483BN",
+    "color": "FK",
+    "part": "뒷판",
+    "price": 8037
+   },
+   {
+    "code": "DSBC0483BN",
+    "color": "FK",
+    "part": "측판L",
+    "price": 4399
+   },
+   {
+    "code": "DSBC0483BN",
+    "color": "FK",
+    "part": "측판R",
+    "price": 4399
+   },
+   {
     "code": "DSBC0483HN",
     "color": "FK",
     "part": "밑선반",
@@ -457,6 +511,18 @@
     "color": "WW",
     "part": "도어R",
     "price": 2743
+   },
+   {
+    "code": "DSCCAH1206",
+    "color": "OS",
+    "part": "이동선반",
+    "price": 2383
+   },
+   {
+    "code": "DSCCAH1206",
+    "color": "OS",
+    "part": "책상 선반",
+    "price": 3975
    },
    {
     "code": "DSCCAV11051",
@@ -1029,10 +1095,46 @@
     "price": 5255
    },
    {
+    "code": "MCICAC261036",
+    "color": "WW",
+    "part": "뒷판",
+    "price": 10213
+   },
+   {
+    "code": "MCICAC261037",
+    "color": "WW",
+    "part": "플랜트박스 밑판",
+    "price": 3018
+   },
+   {
     "code": "MCICAR260164",
     "color": "LD",
     "part": "상판",
     "price": 26323
+   },
+   {
+    "code": "MCICBC260276",
+    "color": "WW",
+    "part": "측판L",
+    "price": 12027
+   },
+   {
+    "code": "MCICBC260276",
+    "color": "WW",
+    "part": "측판R",
+    "price": 12027
+   },
+   {
+    "code": "MCICCC260112",
+    "color": "WW",
+    "part": "측판L",
+    "price": 11881
+   },
+   {
+    "code": "MCICCC260112",
+    "color": "WW",
+    "part": "측판R",
+    "price": 11881
    },
    {
     "code": "MCIFND260290",
@@ -1107,6 +1209,18 @@
     "price": 1681
    },
    {
+    "code": "MCIXXF261002",
+    "color": "KAP",
+    "part": "윗판",
+    "price": 15954
+   },
+   {
+    "code": "MCIXXF261003",
+    "color": "KAP",
+    "part": "윗판",
+    "price": 10805
+   },
+   {
     "code": "MCIXXF261008",
     "color": "RCN",
     "part": "측판L",
@@ -1123,6 +1237,18 @@
     "color": "RCN",
     "part": "도어",
     "price": 14409
+   },
+   {
+    "code": "MCIZDE260112",
+    "color": "UA",
+    "part": "도어(L)",
+    "price": 2583
+   },
+   {
+    "code": "MCIZDE260112",
+    "color": "UA",
+    "part": "윗판",
+    "price": 1958
    },
    {
     "code": "SB4522L",
@@ -7410,6 +7536,420 @@
    "seq": 8019,
    "top": 0,
    "id": "s1119-p02r09"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "MCICCC260112",
+   "part": "측판L",
+   "color": "WW",
+   "packDate": "2026-11-20",
+   "qty": 50,
+   "defects": 8,
+   "reuse": 7,
+   "top": 1,
+   "bottom": 7,
+   "both": 0,
+   "other": 1,
+   "note": "스캔(11/20) 1쪽 1번 · 코드 MCICC260112로 적힘",
+   "seq": 9001,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p01r01"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "MCICBC260276",
+   "part": "측판R",
+   "color": "WW",
+   "packDate": "2026-11-20",
+   "qty": 18,
+   "defects": 1,
+   "reuse": 1,
+   "top": 0,
+   "bottom": 1,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 1쪽 2번",
+   "seq": 9002,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p01r02"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "MCICBC260276",
+   "part": "측판L",
+   "color": "WW",
+   "packDate": "2026-11-20",
+   "qty": 18,
+   "defects": 1,
+   "reuse": 1,
+   "top": 0,
+   "bottom": 1,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 1쪽 3번",
+   "seq": 9003,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p01r03"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "DSAC0185B",
+   "part": "뒷판",
+   "color": "FK",
+   "packDate": "2026-11-20",
+   "qty": 20,
+   "defects": 3,
+   "reuse": 3,
+   "top": 0,
+   "bottom": 3,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 1쪽 4번",
+   "seq": 9004,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p01r04"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "MCICCC260112",
+   "part": "측판R",
+   "color": "WW",
+   "packDate": "2026-11-20",
+   "qty": 50,
+   "defects": 6,
+   "reuse": 6,
+   "top": 0,
+   "bottom": 6,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 1쪽 5번",
+   "seq": 9005,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p01r05"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "DSBC0483BN",
+   "part": "뒷판",
+   "color": "FK",
+   "packDate": "2026-11-20",
+   "qty": 20,
+   "defects": 7,
+   "reuse": 7,
+   "top": 0,
+   "bottom": 7,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 1쪽 6번",
+   "seq": 9006,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p01r06"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "DSBC0163B",
+   "part": "뒷판L",
+   "color": "FK",
+   "packDate": "2026-11-20",
+   "qty": 20,
+   "defects": 5,
+   "reuse": 4,
+   "top": 0,
+   "bottom": 4,
+   "both": 0,
+   "other": 1,
+   "note": "스캔(11/20) 1쪽 7번",
+   "seq": 9007,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p01r07"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "DSBC0163B",
+   "part": "뒷판R",
+   "color": "FK",
+   "packDate": "2026-11-20",
+   "qty": 20,
+   "defects": 4,
+   "reuse": 4,
+   "top": 0,
+   "bottom": 4,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 1쪽 8번",
+   "seq": 9008,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p01r08"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "DSBC0163B",
+   "part": "측판L",
+   "color": "FK",
+   "packDate": "2026-11-20",
+   "qty": 20,
+   "defects": 1,
+   "reuse": 1,
+   "top": 0,
+   "bottom": 1,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 1쪽 9번",
+   "seq": 9009,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p01r09"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "DSBC0163B",
+   "part": "측판R",
+   "color": "FK",
+   "packDate": "2026-11-20",
+   "qty": 20,
+   "defects": 1,
+   "reuse": 0,
+   "top": 0,
+   "bottom": 0,
+   "both": 0,
+   "other": 1,
+   "note": "스캔(11/20) 1쪽 10번",
+   "seq": 9010,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p01r10"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "DSBC0483BN",
+   "part": "측판L",
+   "color": "FK",
+   "packDate": "",
+   "qty": 20,
+   "defects": 3,
+   "reuse": 2,
+   "top": 0,
+   "bottom": 2,
+   "both": 0,
+   "other": 1,
+   "note": "스캔(11/20) 2쪽 1번 · 코드 DSB0483BN으로 적힘",
+   "seq": 9011,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p02r01"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "DSBC0483BN",
+   "part": "측판R",
+   "color": "FK",
+   "packDate": "",
+   "qty": 20,
+   "defects": 1,
+   "reuse": 1,
+   "top": 0,
+   "bottom": 1,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 2쪽 2번",
+   "seq": 9012,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p02r02"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "DSAD0412H",
+   "part": "상판",
+   "color": "ML",
+   "packDate": "2026-11-20",
+   "qty": 20,
+   "defects": 1,
+   "reuse": 1,
+   "top": 0,
+   "bottom": 1,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 2쪽 3번",
+   "seq": 9013,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p02r03"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "MCIZDE260112",
+   "part": "도어(L)",
+   "color": "UA",
+   "packDate": "2026-11-19",
+   "qty": 28,
+   "defects": 2,
+   "reuse": 2,
+   "top": 0,
+   "bottom": 2,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 2쪽 4번",
+   "seq": 9014,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p02r04"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "MCIZDE260112",
+   "part": "윗판",
+   "color": "UA",
+   "packDate": "2026-11-19",
+   "qty": 28,
+   "defects": 3,
+   "reuse": 3,
+   "top": 0,
+   "bottom": 3,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 2쪽 5번",
+   "seq": 9015,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p02r05"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "DSCCAH1206",
+   "part": "이동선반",
+   "color": "OS",
+   "packDate": "2026-11-20",
+   "qty": 60,
+   "defects": 1,
+   "reuse": 1,
+   "top": 0,
+   "bottom": 1,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 2쪽 6번",
+   "seq": 9016,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p02r06"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "MCIXXF261003",
+   "part": "윗판",
+   "color": "KAP",
+   "packDate": "2026-11-19",
+   "qty": 22,
+   "defects": 4,
+   "reuse": 1,
+   "top": 0,
+   "bottom": 1,
+   "both": 0,
+   "other": 3,
+   "note": "스캔(11/20) 2쪽 7번",
+   "seq": 9017,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p02r07"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "MCIXXF261003",
+   "part": "윗판",
+   "color": "KAP",
+   "packDate": "2026-11-19",
+   "qty": 21,
+   "defects": 0,
+   "reuse": 0,
+   "top": 0,
+   "bottom": 0,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 2쪽 8번",
+   "seq": 9018,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p02r08"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "MCIXXF261002",
+   "part": "윗판",
+   "color": "KAP",
+   "packDate": "2026-11-19",
+   "qty": 40,
+   "defects": 2,
+   "reuse": 2,
+   "top": 0,
+   "bottom": 2,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 2쪽 9번",
+   "seq": 9019,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p02r09"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "DSCCAH1206",
+   "part": "이동선반",
+   "color": "OS",
+   "packDate": "2026-11-20",
+   "qty": 40,
+   "defects": 0,
+   "reuse": 0,
+   "top": 0,
+   "bottom": 0,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 2쪽 10번",
+   "seq": 9020,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p02r10"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "DSCCAH1206",
+   "part": "책상 선반",
+   "color": "OS",
+   "packDate": "2026-11-20",
+   "qty": 50,
+   "defects": 4,
+   "reuse": 4,
+   "top": 0,
+   "bottom": 4,
+   "both": 0,
+   "other": 0,
+   "note": "스캔(11/20) 3쪽 1번",
+   "seq": 9021,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p03r01"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "MCICAC261037",
+   "part": "플랜트박스 밑판",
+   "color": "WW",
+   "packDate": "",
+   "qty": 50,
+   "defects": 4,
+   "reuse": 3,
+   "top": 0,
+   "bottom": 3,
+   "both": 0,
+   "other": 1,
+   "note": "스캔(11/20) 3쪽 2번 · 포장일 없음",
+   "seq": 9022,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p03r02"
+  },
+  {
+   "date": "2026-11-19",
+   "code": "MCICAC261036",
+   "part": "뒷판",
+   "color": "WW",
+   "packDate": "2026-11-20",
+   "qty": 51,
+   "defects": 6,
+   "reuse": 5,
+   "top": 0,
+   "bottom": 5,
+   "both": 0,
+   "other": 1,
+   "note": "스캔(11/20) 3쪽 3번",
+   "seq": 9023,
+   "createdAt": "2026-11-20T09:00:00Z",
+   "id": "s1120-p03r03"
   }
  ]
 }
