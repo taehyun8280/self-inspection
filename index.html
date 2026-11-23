@@ -335,7 +335,7 @@ tfoot td{font-weight:700;background:var(--soft)}
   // 그래프는 고른 날이 속한 주(일별), 고른 달의 주차(주별), 고른 해의 달(월별)을 칸으로 보여 줌
   const P = { mode:'day', y:0, m:0, w:'', d:'' };
   function setMode(m){ P.mode = m; $('seg').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.mode === m))); }
-  $('seg').addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (!b) return; setMode(b.dataset.mode); render(); });
+  $('seg').addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (!b) return; setMode(b.dataset.mode); if (b.dataset.mode === 'week') P.w = ''; render(); });
   $('selY').addEventListener('change', () => { P.y = +$('selY').value; P.w = P.d = ''; render(); });
   $('selM').addEventListener('change', () => { P.m = +$('selM').value; P.w = P.d = ''; render(); });
   $('selW').addEventListener('change', () => { P.w = $('selW').value; render(); });
@@ -359,8 +359,9 @@ tfoot td{font-weight:700;background:var(--soft)}
     if (m === 'week'){
       const counts = {}; base().forEach(r => { if (r.date){ const k = weekStart(r.date); counts[k] = (counts[k]||0) + 1; } });
       const ws = weeksOfMonth(P.y, P.m);
-      if (!ws.some(x => x.ws === P.w)){ const withData = ws.filter(x => counts[x.ws]); P.w = (withData.pop() || ws[0] || {}).ws || ''; }
-      $('selW').innerHTML = ws.map(x => `<option value="${x.ws}" ${x.ws===P.w?'selected':''}>${x.w}주${counts[x.ws]?` (${counts[x.ws]}건)`:''}</option>`).join('');
+      if (P.w && !ws.some(x => x.ws === P.w)) P.w = '';
+      const tot = ws.reduce((a, x) => a + (counts[x.ws] || 0), 0);
+      $('selW').innerHTML = `<option value="" ${P.w ? '' : 'selected'}>전체${tot ? ` (${tot}건)` : ''}</option>` + ws.map(x => `<option value="${x.ws}" ${x.ws===P.w?'selected':''}>${x.w}주${counts[x.ws]?` (${counts[x.ws]}건)`:''}</option>`).join('');
     }
     if (m === 'day'){
       const counts = {}; base().forEach(r => { if (r.date) counts[r.date] = (counts[r.date]||0) + 1; });
@@ -371,7 +372,7 @@ tfoot td{font-weight:700;background:var(--soft)}
   }
   function periodTitle(){
     if (P.mode === 'day') return `${P.y}년 ${P.m}월 ${+P.d.slice(8)}일 (${DOW[toDate(P.d).getDay()]})`;
-    if (P.mode === 'week'){ const wi = weekInfo(P.w); return `${wi.y}년 ${wi.m}월 ${wi.w}주 (${md(P.w)}~${md(weekEnd(P.w))})`; }
+    if (P.mode === 'week'){ if (!P.w) return `${P.y}년 ${P.m}월 전체`; const wi = weekInfo(P.w); return `${wi.y}년 ${wi.m}월 ${wi.w}주 (${md(P.w)}~${md(weekEnd(P.w))})`; }
     if (P.mode === 'month') return `${P.y}년 ${P.m}월`;
     return '전체 기간';
   }
@@ -385,7 +386,7 @@ tfoot td{font-weight:700;background:var(--soft)}
   function periodRows(){
     const b = base();
     if (P.mode === 'day') return b.filter(r => r.date === P.d);
-    if (P.mode === 'week') return b.filter(r => r.date && weekStart(r.date) === P.w);
+    if (P.mode === 'week'){ if (P.w) return b.filter(r => r.date && weekStart(r.date) === P.w); const ws = weeksOfMonth(P.y, P.m).map(x => x.ws); return b.filter(r => r.date && ws.includes(weekStart(r.date))); }
     if (P.mode === 'month') return b.filter(r => r.date && r.date.startsWith(ymKey()));
     return b;
   }
@@ -393,7 +394,7 @@ tfoot td{font-weight:700;background:var(--soft)}
   function buckets(){
     if (P.mode === 'day') return Array.from({length:5}, (_,i) => { const t = toDate(weekStart(P.d)); /* 월~금 */ t.setDate(t.getDate()+i); const d = ymd(t);
       return {label:`${t.getDate()}(${DOW[t.getDay()]})`, match:r => r.date === d, sel:d === P.d, select:() => { P.d = d; P.y = +d.slice(0,4); P.m = +d.slice(5,7); }}; });
-    if (P.mode === 'week') return weeksOfMonth(P.y, P.m).map(x => ({label:`${x.w}주 (${md(x.ws)}~)`, match:r => r.date && weekStart(r.date) === x.ws, sel:x.ws === P.w, select:() => { P.w = x.ws; }}));
+    if (P.mode === 'week') return weeksOfMonth(P.y, P.m).map(x => ({label:`${x.w}주 (${md(x.ws)}~)`, match:r => r.date && weekStart(r.date) === x.ws, sel:x.ws === P.w, select:() => { P.w = (P.w === x.ws ? '' : x.ws); }}));
     if (P.mode === 'month'){
       // 기록이 있는 달만 (첫 달 ~ 마지막 달) 보여서 막대를 넓게
       const ms = rows.filter(r => r.date && +r.date.slice(0,4) === P.y).map(r => +r.date.slice(5,7));
