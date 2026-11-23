@@ -115,6 +115,10 @@ button,input,select{font:inherit;color:inherit}
 .periodbar .range{font-size:13px;color:var(--muted)}
 .periodbar .range b{color:var(--ink);font-weight:600}
 .tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.wkpanel{gap:10px}
+.wkpanel table{min-width:0}
+.wkpanel tbody tr{cursor:pointer}
+.wkpanel tbody tr.empty td{color:var(--muted)}
 table{border-collapse:collapse;width:100%;min-width:1060px;font-size:13px}
 th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
 thead th{background:var(--soft);font-size:12px;color:var(--muted);font-weight:600}
@@ -204,6 +208,17 @@ tfoot td{font-weight:700;background:var(--soft)}
     </div>
   </section>
 
+
+  <section class="panel wkpanel" id="weekPanel" hidden aria-label="요일별 표">
+    <h2 id="weekTitle">요일별</h2>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>요일</th><th class="r">검사수량</th><th class="r">불량수량</th><th class="r">재사용</th><th class="r">폐기</th><th class="c">불량률</th><th class="r">재사용 금액</th><th class="r">폐기 금액</th><th class="r">건수</th></tr></thead>
+        <tbody id="weekBody"></tbody>
+        <tfoot id="weekFoot"></tfoot>
+      </table>
+    </div>
+  </section>
 
   <section class="formpanel" id="pricePanel" hidden aria-label="단가 입력">
     <div class="toolbar"><h2>제품코드 · 색상 · 부품별 단가 (원/EA)</h2><span class="note" id="priceNote"></span></div>
@@ -406,6 +421,29 @@ tfoot td{font-weight:700;background:var(--soft)}
     return out;
   }
 
+
+  // ---------- 주별: 고른 주의 월~금 요일별 표 (막대를 누르면 그 주로 바뀜, 줄을 누르면 그 날 일별 화면) ----------
+  function renderWeek(){
+    const show = P.mode === 'week' && !!P.w; $('weekPanel').hidden = !show; if (!show) return;
+    const b = base(), wi = weekInfo(P.w), fri = toDate(P.w); fri.setDate(fri.getDate() + 4);
+    $('weekTitle').textContent = `${wi.m}월 ${wi.w}주 요일별 (${md(P.w)} ~ ${md(ymd(fri))})`;
+    const z = v => v ? fmtN(v) : '<span class="dim">–</span>';
+    const all = [];
+    $('weekBody').innerHTML = Array.from({length:5}, (_, i) => {
+      const t = toDate(P.w); t.setDate(t.getDate() + i); const d = ymd(t);
+      const list = b.filter(r => r.date === d); all.push(...list); const s = sums(list);
+      return `<tr data-day="${d}" class="${list.length ? '' : 'empty'}"><td>${md(d)} (${DOW[t.getDay()]})</td>
+        <td class="r num">${z(s.qty)}</td><td class="r num"><b>${z(s.def)}</b></td><td class="r num">${z(s.reuse)}</td><td class="r num">${z(s.scrap)}</td>
+        <td class="c">${s.qty ? `<span class="pill ${level(pct(s.def,s.qty))}">${fmtPct(pct(s.def,s.qty))}</span>` : '<span class="dim">–</span>'}</td>
+        <td class="r num">${z(Math.round(s.reuseAmt))}</td><td class="r num">${z(Math.round(s.scrapAmt))}</td><td class="r num dim">${list.length || '–'}</td></tr>`;
+    }).join('');
+    const s = sums(all);
+    $('weekFoot').innerHTML = `<tr><td>합계</td><td class="r num">${fmtN(s.qty)}</td><td class="r num">${fmtN(s.def)}</td><td class="r num">${fmtN(s.reuse)}</td><td class="r num">${fmtN(s.scrap)}</td>
+      <td class="c"><span class="pill ${level(pct(s.def,s.qty))}">${fmtPct(pct(s.def,s.qty))}</span></td><td class="r num">${fmtN(s.reuseAmt)}</td><td class="r num">${fmtN(s.scrapAmt)}</td><td class="r num">${all.length}</td></tr>`;
+  }
+  $('weekBody').addEventListener('click', e => { const tr = e.target.closest('[data-day]'); if (!tr) return; const d = tr.dataset.day;
+    setMode('day'); P.d = d; P.y = +d.slice(0,4); P.m = +d.slice(5,7); P.w = weekStart(d); render(); });
+
   // ---------- render ----------
   function fillSelect(sel, values){ const cur = sel.value;
     sel.innerHTML = '<option value="">전체</option>' + values.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
@@ -418,7 +456,7 @@ tfoot td{font-weight:700;background:var(--soft)}
     renderPeriod();
     const list = periodRows(), s = sums(list), days = new Set(list.map(r => r.date)).size;
     $('range').innerHTML = `<b>${periodTitle()}</b> · ${days}일 · ${list.length}건 · 검사 ${fmtN(s.qty)}EA`;
-    renderKpis(list); renderCharts(base()); renderTable(list);
+    renderKpis(list); renderCharts(base()); renderWeek(); renderTable(list);
   }
 
   function sums(list){
