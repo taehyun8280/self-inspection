@@ -394,7 +394,12 @@ tfoot td{font-weight:700;background:var(--soft)}
     if (P.mode === 'day') return Array.from({length:5}, (_,i) => { const t = toDate(weekStart(P.d)); /* 월~금 */ t.setDate(t.getDate()+i); const d = ymd(t);
       return {label:`${t.getDate()}(${DOW[t.getDay()]})`, match:r => r.date === d, sel:d === P.d, select:() => { P.d = d; P.y = +d.slice(0,4); P.m = +d.slice(5,7); }}; });
     if (P.mode === 'week') return weeksOfMonth(P.y, P.m).map(x => ({label:`${x.w}주 (${md(x.ws)}~)`, match:r => r.date && weekStart(r.date) === x.ws, sel:x.ws === P.w, select:() => { P.w = x.ws; }}));
-    if (P.mode === 'month') return Array.from({length:12}, (_,i) => { const k = `${P.y}-${pad(i+1)}`; return {label:`${i+1}월`, match:r => r.date && r.date.startsWith(k), sel:i+1 === P.m, select:() => { P.m = i+1; }}; });
+    if (P.mode === 'month'){
+      // 기록이 있는 달만 (첫 달 ~ 마지막 달) 보여서 막대를 넓게
+      const ms = rows.filter(r => r.date && +r.date.slice(0,4) === P.y).map(r => +r.date.slice(5,7));
+      const lo = ms.length ? Math.min(...ms) : 1, hi = ms.length ? Math.max(...ms) : 12;
+      return Array.from({length:hi-lo+1}, (_,j) => { const i = lo - 1 + j; const k = `${P.y}-${pad(i+1)}`; return {label:`${i+1}월`, match:r => r.date && r.date.startsWith(k), sel:i+1 === P.m, select:() => { P.m = i+1; }}; });
+    }
     const ds = rows.map(r => r.date).filter(Boolean).sort(); if (!ds.length) return [];
     const out = []; let y = +ds[0].slice(0,4), mo = +ds[0].slice(5,7); const ey = +ds[ds.length-1].slice(0,4), em = +ds[ds.length-1].slice(5,7);
     while (y < ey || (y === ey && mo <= em)){ const k = `${y}-${pad(mo)}`, yy = y, mm = mo; out.push({label:`${String(y).slice(2)}년 ${mo}월`, match:r => r.date && r.date.startsWith(k), sel:false, select:() => { setMode('month'); P.y = yy; P.m = mm; }}); if (++mo > 12){ mo = 1; y++; } }
@@ -449,9 +454,15 @@ tfoot td{font-weight:700;background:var(--soft)}
       const {ctx} = chart; ctx.save(); ctx.textAlign = 'center';
       if (o.kind === 'qty'){
         // 검사수량 · 재사용 · 폐기 막대마다 위에 숫자
+        // 숫자가 서로 겹치면 위로 한 칸씩 올려서 그림 (좁은 막대는 글씨를 조금 작게)
+        const placed = [];
         chart.data.datasets.forEach((ds, di) => { const m = chart.getDatasetMeta(di); if (m.hidden) return;
           ds.data.forEach((v, i) => { if (!v) return; const b = m.data[i];
-            ctx.font = `700 12px ${FONT}`; ctx.fillStyle = o.ink; ctx.textBaseline = 'bottom'; ctx.fillText(fmtN(v), b.x, b.y - 4); }); });
+            const size = (b.width || 30) < 26 ? 10 : 12, lh = size + 2;
+            ctx.font = `700 ${size}px ${FONT}`; ctx.fillStyle = o.ink; ctx.textBaseline = 'bottom';
+            const t = fmtN(v), w = ctx.measureText(t).width; let y = b.y - 4;
+            for (let k = 0; k < 30 && placed.some(q => Math.abs(q.x - b.x) < (q.w + w) / 2 + 2 && Math.abs(q.y - y) < lh); k++) y -= lh;
+            placed.push({x:b.x, y, w}); ctx.fillText(t, b.x, y); }); });
       } else {
         const m = chart.getDatasetMeta(0); ctx.font = `700 12px ${FONT}`; ctx.fillStyle = o.ink; ctx.textBaseline = 'bottom';
         chart.data.datasets[0].data.forEach((v, i) => { if (v == null || !o.has[i]) return; const p = m.data[i]; ctx.fillText(v.toFixed(o.f), p.x, p.y - 8); });
@@ -491,7 +502,7 @@ tfoot td{font-weight:700;background:var(--soft)}
       options:{ ...common, layout:{padding:{top:4}},
         plugins:{ ...common.plugins, valueLabels:{kind:'qty', ink, muted, reuse:cssv('--reuse'), scrap:cssv('--scrap')},
           tooltip:{ ...common.plugins.tooltip, callbacks:{ label: x => ` ${x.dataset.label} ${fmtN(x.parsed.y)} EA` } } },
-        scales:{ x:common.scales.x, y:{...common.scales.y, suggestedMax:maxTot * 1.12} } } });
+        scales:{ x:common.scales.x, y:{...common.scales.y, suggestedMax:maxTot * 1.2} } } });
 
     // 재사용 금액 · 폐기 금액 그래프를 따로 그림 (각각 기간 합계 표시)
     const noPrice = Object.keys(prices).length === 0;
