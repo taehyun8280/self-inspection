@@ -331,19 +331,21 @@ tfoot td{font-weight:700;background:var(--soft)}
   const base = () => rows.filter(r => (!F.part || r.part === F.part) && (!F.color || r.color === F.color) && (!F.q || String(r.code||'').toUpperCase().includes(F.q)));
 
   // ---------- 기간 선택 (일별 · 주별 · 월별 · 전체) ----------
-  // 일별: 년도·월·일 / 주별: 년도·월·주 / 월별: 년도·월 → 요약 · 검사 기록은 고른 그 날·주·월
-  // 그래프는 고른 날이 속한 주(일별), 고른 달의 주차(주별), 고른 해의 달(월별)을 칸으로 보여 줌
-  const P = { mode:'day', y:0, m:0, w:'', d:'' };
+  // 처음에는 묶음 전체 합계 → 그래프 막대(또는 선택칸)를 고르면 그 날·주·월만, 같은 막대를 다시 누르면 다시 전체
+  // 일별: 고른 주(월~금) 전체 → 일 / 주별: 고른 달 전체 → 주 / 월별: 고른 해 전체 → 월
+  const P = { mode:'day', y:0, m:0, w:'', d:'', dw:'', mAll:true };
   function setMode(m){ P.mode = m; $('seg').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.mode === m))); }
-  $('seg').addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (!b) return; setMode(b.dataset.mode); if (b.dataset.mode === 'week') P.w = ''; render(); });
-  $('selY').addEventListener('change', () => { P.y = +$('selY').value; P.w = P.d = ''; render(); });
-  $('selM').addEventListener('change', () => { P.m = +$('selM').value; P.w = P.d = ''; render(); });
+  $('seg').addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (!b) return; setMode(b.dataset.mode);
+    if (P.mode === 'week') P.w = ''; if (P.mode === 'month') P.mAll = true; if (P.mode === 'day') P.d = ''; render(); });
+  $('selY').addEventListener('change', () => { P.y = +$('selY').value; P.w = P.d = P.dw = ''; P.mAll = true; render(); });
+  $('selM').addEventListener('change', () => { const v = $('selM').value; if (v === '') P.mAll = true; else { P.m = +v; P.mAll = false; } P.w = P.d = P.dw = ''; render(); });
   $('selW').addEventListener('change', () => { P.w = $('selW').value; render(); });
-  $('selD').addEventListener('change', () => { P.d = $('selD').value; render(); });
+  $('selD').addEventListener('change', () => { const v = $('selD').value; if (v.startsWith('w:')){ P.dw = v.slice(2); P.d = ''; } else { P.d = v; P.dw = weekStart(v); } render(); });
 
   function latestDate(){ return rows.reduce((a,r) => r.date && r.date > a ? r.date : a, ''); }
-  function initPeriod(){ const d = latestDate() || ymd(new Date()); P.y = +d.slice(0,4); P.m = +d.slice(5,7); P.d = d; P.w = weekStart(d); }
+  function initPeriod(){ const d = latestDate() || ymd(new Date()); P.y = +d.slice(0,4); P.m = +d.slice(5,7); P.d = ''; P.dw = weekStart(d); P.w = ''; P.mAll = true; }
   const ymKey = () => `${P.y}-${pad(P.m)}`;
+  const fri = ws => { const t = toDate(ws); t.setDate(t.getDate() + 4); return ymd(t); };
 
   function renderPeriod(){
     const m = P.mode;
@@ -354,8 +356,10 @@ tfoot td{font-weight:700;background:var(--soft)}
     const years = new Set(rows.map(r => r.date && +r.date.slice(0,4)).filter(Boolean)); years.add(new Date().getFullYear()); if (P.y) years.add(P.y);
     const mc = {}; base().forEach(r => { if (r.date){ const k = r.date.slice(0,7); mc[k] = (mc[k]||0) + 1; } });
     $('selY').innerHTML = [...years].sort().map(y => `<option value="${y}" ${y===P.y?'selected':''}>${y}년</option>`).join('');
-    $('selM').innerHTML = Array.from({length:12}, (_,i) => i+1).map(x => { const c = mc[`${P.y}-${pad(x)}`];
-      return `<option value="${x}" ${x===P.m?'selected':''}>${x}월${m==='month' && c ? ` (${c}건)` : ''}</option>`; }).join('');
+    const yTot = Object.entries(mc).filter(([k]) => k.startsWith(P.y + '-')).reduce((a,[,v]) => a + v, 0);
+    $('selM').innerHTML = (m === 'month' ? `<option value="" ${P.mAll ? 'selected' : ''}>전체${yTot ? ` (${yTot}건)` : ''}</option>` : '') +
+      Array.from({length:12}, (_,i) => i+1).map(x => { const c = mc[`${P.y}-${pad(x)}`];
+        return `<option value="${x}" ${x===P.m && !(m==='month' && P.mAll) ? 'selected' : ''}>${x}월${m==='month' && c ? ` (${c}건)` : ''}</option>`; }).join('');
     if (m === 'week'){
       const counts = {}; base().forEach(r => { if (r.date){ const k = weekStart(r.date); counts[k] = (counts[k]||0) + 1; } });
       const ws = weeksOfMonth(P.y, P.m);
@@ -364,46 +368,54 @@ tfoot td{font-weight:700;background:var(--soft)}
       $('selW').innerHTML = `<option value="" ${P.w ? '' : 'selected'}>전체${tot ? ` (${tot}건)` : ''}</option>` + ws.map(x => `<option value="${x.ws}" ${x.ws===P.w?'selected':''}>${x.w}주${counts[x.ws]?` (${counts[x.ws]}건)`:''}</option>`).join('');
     }
     if (m === 'day'){
-      const counts = {}; base().forEach(r => { if (r.date) counts[r.date] = (counts[r.date]||0) + 1; });
-      const last = new Date(P.y, P.m, 0).getDate(), days = Array.from({length:last}, (_,i) => `${ymKey()}-${pad(i+1)}`);
-      if (!days.includes(P.d)){ const withData = days.filter(d => counts[d]); P.d = withData.pop() || days[0]; }
-      $('selD').innerHTML = days.map(d => `<option value="${d}" ${d===P.d?'selected':''}>${+d.slice(8)}일 (${DOW[toDate(d).getDay()]})${counts[d]?` · ${counts[d]}건`:''}</option>`).join('');
+      const dc = {}, wc = {}; base().forEach(r => { if (r.date){ dc[r.date] = (dc[r.date]||0) + 1; const k = weekStart(r.date); wc[k] = (wc[k]||0) + 1; } });
+      const ws = weeksOfMonth(P.y, P.m);
+      if (!ws.some(x => x.ws === P.dw)){ const withData = ws.filter(x => wc[x.ws]); P.dw = (withData.pop() || ws[0] || {}).ws || ''; }
+      if (P.d && weekStart(P.d) !== P.dw) P.d = '';
+      $('selD').innerHTML = ws.map(x => {
+        const days = Array.from({length:5}, (_,i) => { const t = toDate(x.ws); t.setDate(t.getDate()+i); return ymd(t); });
+        return `<optgroup label="${x.w}주 (${md(x.ws)}~${md(fri(x.ws))})">` +
+          `<option value="w:${x.ws}" ${!P.d && x.ws===P.dw ? 'selected' : ''}>${x.w}주 전체${wc[x.ws] ? ` · ${wc[x.ws]}건` : ''}</option>` +
+          days.map(d => `<option value="${d}" ${d===P.d?'selected':''}>${+d.slice(5,7)}/${+d.slice(8)} (${DOW[toDate(d).getDay()]})${dc[d]?` · ${dc[d]}건`:''}</option>`).join('') + '</optgroup>';
+      }).join('');
     }
   }
   function periodTitle(){
-    if (P.mode === 'day') return `${P.y}년 ${P.m}월 ${+P.d.slice(8)}일 (${DOW[toDate(P.d).getDay()]})`;
+    if (P.mode === 'day'){ if (!P.d){ const wi = weekInfo(P.dw); return `${wi.y}년 ${wi.m}월 ${wi.w}주 전체 (${md(P.dw)}~${md(fri(P.dw))})`; }
+      return `${+P.d.slice(0,4)}년 ${+P.d.slice(5,7)}월 ${+P.d.slice(8)}일 (${DOW[toDate(P.d).getDay()]})`; }
     if (P.mode === 'week'){ if (!P.w) return `${P.y}년 ${P.m}월 전체`; const wi = weekInfo(P.w); return `${wi.y}년 ${wi.m}월 ${wi.w}주 (${md(P.w)}~${md(weekEnd(P.w))})`; }
-    if (P.mode === 'month') return `${P.y}년 ${P.m}월`;
+    if (P.mode === 'month') return P.mAll ? `${P.y}년 전체` : `${P.y}년 ${P.m}월`;
     return '전체 기간';
   }
   // 그래프 범위 제목
   function chartTitle(){
-    if (P.mode === 'day') return `${weekLabel(weekStart(P.d))} 일별`;
+    if (P.mode === 'day') return `${weekLabel(P.dw)} 일별`;
     if (P.mode === 'week') return `${P.y}년 ${P.m}월 주별`;
     if (P.mode === 'month') return `${P.y}년 월별`;
     return '전체 기간 월별';
   }
   function periodRows(){
     const b = base();
-    if (P.mode === 'day') return b.filter(r => r.date === P.d);
+    if (P.mode === 'day') return P.d ? b.filter(r => r.date === P.d) : b.filter(r => r.date && weekStart(r.date) === P.dw);
     if (P.mode === 'week'){ if (P.w) return b.filter(r => r.date && weekStart(r.date) === P.w); const ws = weeksOfMonth(P.y, P.m).map(x => x.ws); return b.filter(r => r.date && ws.includes(weekStart(r.date))); }
-    if (P.mode === 'month') return b.filter(r => r.date && r.date.startsWith(ymKey()));
+    if (P.mode === 'month') return P.mAll ? b.filter(r => r.date && +r.date.slice(0,4) === P.y) : b.filter(r => r.date && r.date.startsWith(ymKey()));
     return b;
   }
-  // 그래프 가로축 칸
+  // 그래프 가로축 칸 (같은 칸을 다시 누르면 다시 전체)
   function buckets(){
-    if (P.mode === 'day') return Array.from({length:5}, (_,i) => { const t = toDate(weekStart(P.d)); /* 월~금 */ t.setDate(t.getDate()+i); const d = ymd(t);
-      return {label:`${t.getDate()}(${DOW[t.getDay()]})`, match:r => r.date === d, sel:d === P.d, select:() => { P.d = d; P.y = +d.slice(0,4); P.m = +d.slice(5,7); }}; });
+    if (P.mode === 'day') return Array.from({length:5}, (_,i) => { const t = toDate(P.dw); /* 월~금 */ t.setDate(t.getDate()+i); const d = ymd(t);
+      return {label:`${t.getDate()}(${DOW[t.getDay()]})`, match:r => r.date === d, sel:d === P.d, select:() => { P.d = (P.d === d ? '' : d); }}; });
     if (P.mode === 'week') return weeksOfMonth(P.y, P.m).map(x => ({label:`${x.w}주 (${md(x.ws)}~)`, match:r => r.date && weekStart(r.date) === x.ws, sel:x.ws === P.w, select:() => { P.w = (P.w === x.ws ? '' : x.ws); }}));
     if (P.mode === 'month'){
       // 기록이 있는 달만 (첫 달 ~ 마지막 달) 보여서 막대를 넓게
       const ms = rows.filter(r => r.date && +r.date.slice(0,4) === P.y).map(r => +r.date.slice(5,7));
       const lo = ms.length ? Math.min(...ms) : 1, hi = ms.length ? Math.max(...ms) : 12;
-      return Array.from({length:hi-lo+1}, (_,j) => { const i = lo - 1 + j; const k = `${P.y}-${pad(i+1)}`; return {label:`${i+1}월`, match:r => r.date && r.date.startsWith(k), sel:i+1 === P.m, select:() => { P.m = i+1; }}; });
+      return Array.from({length:hi-lo+1}, (_,j) => { const i = lo - 1 + j; const k = `${P.y}-${pad(i+1)}`;
+        return {label:`${i+1}월`, match:r => r.date && r.date.startsWith(k), sel:!P.mAll && i+1 === P.m, select:() => { if (!P.mAll && P.m === i+1) P.mAll = true; else { P.m = i+1; P.mAll = false; } }}; });
     }
     const ds = rows.map(r => r.date).filter(Boolean).sort(); if (!ds.length) return [];
     const out = []; let y = +ds[0].slice(0,4), mo = +ds[0].slice(5,7); const ey = +ds[ds.length-1].slice(0,4), em = +ds[ds.length-1].slice(5,7);
-    while (y < ey || (y === ey && mo <= em)){ const k = `${y}-${pad(mo)}`, yy = y, mm = mo; out.push({label:`${String(y).slice(2)}년 ${mo}월`, match:r => r.date && r.date.startsWith(k), sel:false, select:() => { setMode('month'); P.y = yy; P.m = mm; }}); if (++mo > 12){ mo = 1; y++; } }
+    while (y < ey || (y === ey && mo <= em)){ const k = `${y}-${pad(mo)}`, yy = y, mm = mo; out.push({label:`${String(y).slice(2)}년 ${mo}월`, match:r => r.date && r.date.startsWith(k), sel:false, select:() => { setMode('month'); P.y = yy; P.m = mm; P.mAll = false; }}); if (++mo > 12){ mo = 1; y++; } }
     return out;
   }
 
