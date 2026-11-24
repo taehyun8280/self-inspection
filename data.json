@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-24T10:00:00Z",
+ "updated": "2026-11-24T11:00:00Z",
  "prices": {
   "items": [
    {
@@ -247,6 +247,12 @@
     "color": "WW",
     "part": "상판",
     "price": 26721
+   },
+   {
+    "code": "COIWAC260351",
+    "color": "WW",
+    "part": "측판L",
+    "price": 12832
    },
    {
     "code": "CRN1114Z",
@@ -621,6 +627,12 @@
     "price": 23926
    },
    {
+    "code": "DSFGAV0703",
+    "color": "FK",
+    "part": "사이드스크린 목재",
+    "price": 3211
+   },
+   {
     "code": "FAC1082ULN",
     "color": "WW",
     "part": "우측판",
@@ -735,6 +747,12 @@
     "price": 2166
    },
    {
+    "code": "FDP0302AHE",
+    "color": "WWTS",
+    "part": "우측판",
+    "price": 2966
+   },
+   {
     "code": "FDP0303A",
     "color": "WW",
     "part": "우측판",
@@ -763,6 +781,12 @@
     "color": "WW",
     "part": "하부밑판",
     "price": 1956
+   },
+   {
+    "code": "FXXX2411019",
+    "color": "WW",
+    "part": "상판",
+    "price": 14512
    },
    {
     "code": "HBA40F11PHLN",
@@ -1281,6 +1305,12 @@
     "price": 11881
    },
    {
+    "code": "MCIFAD260030",
+    "color": "SP",
+    "part": "행잉상판",
+    "price": 17906
+   },
+   {
     "code": "MCIFAD260117",
     "color": "UA",
     "part": "상판",
@@ -1449,10 +1479,22 @@
     "price": 5203
    },
    {
+    "code": "WDWGMG0003231",
+    "color": "WW",
+    "part": "상판(3인용)",
+    "price": 26982
+   },
+   {
     "code": "WDWW000042-R000",
     "color": "WW",
     "part": "뒷판,마운트 이동식",
     "price": 4979
+   },
+   {
+    "code": "WDWW000045-R000",
+    "color": "FK",
+    "part": "가림판",
+    "price": 2338
    },
    {
     "code": "WDWW000047-R000",
@@ -9015,7 +9057,7 @@
   },
   {
    "date": "2026-11-23",
-   "code": "W0WGMG0003231",
+   "code": "WDWGMG0003231",
    "part": "상판(3인용)",
    "color": "WW",
    "packDate": "2026-11-24",
@@ -9029,7 +9071,8 @@
    "note": "스캔(1123) 3쪽 4번",
    "seq": 11024,
    "createdAt": "2026-11-24T09:00:00Z",
-   "id": "s1124-p03r04"
+   "id": "s1124-p03r04",
+   "codeFixedFrom": "W0WGMG0003231"
   },
   {
    "date": "2026-11-23",
@@ -9195,9 +9238,9 @@
   },
   {
    "date": "2026-11-23",
-   "code": "FAP0302AHD",
+   "code": "FDP0302AHE",
    "part": "우측판",
-   "color": "WW",
+   "color": "WWTS",
    "packDate": "2026-11-24",
    "qty": 48,
    "defects": 3,
@@ -9209,7 +9252,9 @@
    "note": "스캔(1123) 4쪽 4번",
    "seq": 11034,
    "createdAt": "2026-11-24T09:00:00Z",
-   "id": "s1124-p04r04"
+   "id": "s1124-p04r04",
+   "codeFixedFrom": "FAP0302AHD",
+   "colorFixedFrom": "WW"
   },
   {
    "date": "2026-11-23",
