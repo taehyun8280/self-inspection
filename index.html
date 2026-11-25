@@ -236,7 +236,6 @@ tfoot td{font-weight:700;background:var(--soft)}
         <div class="field"><label for="iTop">이물질 · 윗면</label><input type="number" id="iTop" min="0" inputmode="numeric"></div>
         <div class="field"><label for="iBottom">이물질 · 아랫면</label><input type="number" id="iBottom" min="0" inputmode="numeric"></div>
         <div class="field"><label for="iBoth">이물질 · 양면</label><input type="number" id="iBoth" min="0" inputmode="numeric"></div>
-        <div class="field"><label for="iOther">기타 불량</label><input type="number" id="iOther" min="0" inputmode="numeric"></div>
       </div>
     </form>
     <div class="formfoot">
@@ -263,11 +262,11 @@ tfoot td{font-weight:700;background:var(--soft)}
     <div class="tablebox">
       <table>
         <thead>
-          <tr class="grp"><th colspan="11"></th><th colspan="3">불량 (이물질)</th><th></th><th colspan="2"></th></tr>
+          <tr class="grp"><th colspan="11"></th><th colspan="3">불량 (이물질)</th><th colspan="2"></th></tr>
           <tr>
             <th>검사일</th><th>제품코드</th><th>부품</th><th>색상</th><th>포장일</th>
             <th class="r">검사수량</th><th class="r">총 불량</th><th class="r">재사용</th><th class="r">재사용 금액</th><th class="r">폐기</th><th class="r">폐기 금액</th>
-            <th class="r">윗면</th><th class="r">아랫면</th><th class="r">양면</th><th class="r">기타</th>
+            <th class="r">윗면</th><th class="r">아랫면</th><th class="r">양면</th>
             <th class="c">불량률</th><th></th>
           </tr>
         </thead>
@@ -557,8 +556,8 @@ tfoot td{font-weight:700;background:var(--soft)}
   }
 
   function renderTypes(list){
-    const s = sums(list), typed = s.top + s.bottom + s.both + s.other, none = Math.max(0, s.def - typed);
-    const items = [['윗면 (이물질)', s.top, 't-top'], ['아랫면 (이물질)', s.bottom, 't-bottom'], ['양면 (이물질)', s.both, 't-both'], ['기타', s.other, 't-other'], ['미분류', none, 't-none']];
+    const s = sums(list), typed = s.top + s.bottom + s.both, none = Math.max(0, s.def - typed);
+    const items = [['윗면 (이물질)', s.top, 't-top'], ['아랫면 (이물질)', s.bottom, 't-bottom'], ['양면 (이물질)', s.both, 't-both'], ['미분류', none, 't-none']];
     const total = items.reduce((a,b) => a + b[1], 0);
     if (!total){ $('types').innerHTML = '<div class="empty">불량 기록이 없습니다.</div>'; return; }
     $('types').innerHTML =
@@ -578,8 +577,8 @@ tfoot td{font-weight:700;background:var(--soft)}
   }
 
   function issues(r){
-    const out = [], typed = n(r.top)+n(r.bottom)+n(r.both)+n(r.other);
-    if (typed && typed !== n(r.defects)) out.push(`유형 합계 ${typed} ≠ 총 불량 ${n(r.defects)}`);
+    const out = [], typed = n(r.top)+n(r.bottom)+n(r.both);
+    if (typed > n(r.defects)) out.push(`이물질 합계 ${typed} > 총 불량 ${n(r.defects)}`);
     if (n(r.reuse) > n(r.defects)) out.push('재사용이 총 불량보다 많음');
     if (n(r.defects) > n(r.qty)) out.push('불량이 검사수량보다 많음');
     return out;
@@ -589,7 +588,7 @@ tfoot td{font-weight:700;background:var(--soft)}
     const list = (src || periodRows()).slice().sort((a,b) => (b.date||'').localeCompare(a.date||'') || (a.seq||0)-(b.seq||0));
     $('count').textContent = `${list.length}건` + (list.length !== rows.length ? ` / 전체 ${rows.length}건` : '');
     if (!list.length){
-      $('tbody').innerHTML = `<tr><td colspan="17" class="empty" style="text-align:center;padding:28px">${rows.length ? '선택한 기간에 기록이 없습니다.' : '아직 검사 기록이 없습니다. “+ 검사 기록 추가”로 첫 기록을 입력하세요.'}</td></tr>`;
+      $('tbody').innerHTML = `<tr><td colspan="16" class="empty" style="text-align:center;padding:28px">${rows.length ? '선택한 기간에 기록이 없습니다.' : '아직 검사 기록이 없습니다. “+ 검사 기록 추가”로 첫 기록을 입력하세요.'}</td></tr>`;
       $('tfoot').innerHTML = ''; return;
     }
     const z = v => n(v) ? n(v) : '<span class="dim">–</span>';
@@ -600,12 +599,12 @@ tfoot td{font-weight:700;background:var(--soft)}
         <td class="num">${fmtD(r.date)}</td><td class="mono" title="${esc(r.note)}">${esc(r.code)}</td><td>${esc(r.part)}</td><td>${esc(r.color)}</td>
         <td class="num dim">${fmtD(r.packDate)}</td>
         <td class="r num">${n(r.qty)}</td><td class="r num"><b>${n(r.defects)}</b></td><td class="r num">${z(r.reuse)}</td><td class="r num">${won(n(r.reuse), priceOf(r))}</td><td class="r num">${z(scrapOf(r))}</td><td class="r num">${won(scrapOf(r), priceOf(r))}</td>
-        <td class="r num">${z(r.top)}</td><td class="r num">${z(r.bottom)}</td><td class="r num">${z(r.both)}</td><td class="r num">${z(r.other)}</td>
+        <td class="r num">${z(r.top)}</td><td class="r num">${z(r.bottom)}</td><td class="r num">${z(r.both)}</td>
         <td class="c"><span class="pill ${lv}">${fmtPct(rate)}</span> ${iss.length ? `<span class="flag" title="${esc(iss.join(' · '))}">⚠</span>` : ''}</td>
         <td><div class="rowact"><button class="btn" data-edit="${esc(r._id)}" type="button">수정</button><button class="btn ${del?'danger':''}" data-del="${esc(r._id)}" type="button">${del?'삭제 확인':'삭제'}</button></div></td>
       </tr>`; }).join('');
     const s = sums(list);
-    $('tfoot').innerHTML = `<tr><td colspan="5">합계</td><td class="r num">${s.qty}</td><td class="r num">${s.def}</td><td class="r num">${s.reuse}</td><td class="r num">${fmtN(s.reuseAmt)}</td><td class="r num">${s.scrap}</td><td class="r num">${fmtN(s.scrapAmt)}</td><td class="r num">${s.top}</td><td class="r num">${s.bottom}</td><td class="r num">${s.both}</td><td class="r num">${s.other}</td><td class="c"><span class="pill ${level(pct(s.def,s.qty))}">${fmtPct(pct(s.def,s.qty))}</span></td><td></td></tr>`;
+    $('tfoot').innerHTML = `<tr><td colspan="5">합계</td><td class="r num">${s.qty}</td><td class="r num">${s.def}</td><td class="r num">${s.reuse}</td><td class="r num">${fmtN(s.reuseAmt)}</td><td class="r num">${s.scrap}</td><td class="r num">${fmtN(s.scrapAmt)}</td><td class="r num">${s.top}</td><td class="r num">${s.bottom}</td><td class="r num">${s.both}</td><td class="c"><span class="pill ${level(pct(s.def,s.qty))}">${fmtPct(pct(s.def,s.qty))}</span></td><td></td></tr>`;
   }
 
   // ---------- 저장: data.json(저장소 원본) + 이 브라우저의 수정본(localStorage) ----------
@@ -630,10 +629,10 @@ tfoot td{font-weight:700;background:var(--soft)}
   $('btnJson').addEventListener('click', () => saveFile('data.json', JSON.stringify({updated:new Date().toISOString(), prices:{items:priceItems()}, rows:plainRows()}, null, 1), 'application/json'));
   $('btnCsv').addEventListener('click', () => {
     const list = periodRows().slice().sort((a,b) => (a.date||'').localeCompare(b.date||''));
-    const head = ['검사일','제품코드','부품명','색상','포장일','검사수량','총불량수','재사용','폐기','윗면','아랫면','양면','기타','불량률(%)','단가','재사용금액','폐기금액','비고'];
+    const head = ['검사일','제품코드','부품명','색상','포장일','검사수량','총불량수','재사용','폐기','윗면','아랫면','양면','불량률(%)','단가','재사용금액','폐기금액','비고'];
     const q = v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
     const lines = [head.join(',')].concat(list.map(r => { const p = priceOf(r) || '';
-      return [r.date,r.code,r.part,r.color,r.packDate,n(r.qty),n(r.defects),n(r.reuse),scrapOf(r),n(r.top),n(r.bottom),n(r.both),n(r.other),(pct(n(r.defects),n(r.qty))*100).toFixed(1),p,p?n(r.reuse)*p:'',p?scrapOf(r)*p:'',r.note].map(q).join(','); }));
+      return [r.date,r.code,r.part,r.color,r.packDate,n(r.qty),n(r.defects),n(r.reuse),scrapOf(r),n(r.top),n(r.bottom),n(r.both),(pct(n(r.defects),n(r.qty))*100).toFixed(1),p,p?n(r.reuse)*p:'',p?scrapOf(r)*p:'',r.note].map(q).join(','); }));
     saveFile(`자주검사_${new Date().toISOString().slice(0,10)}.csv`, '\ufeff' + lines.join('\r\n'), 'text/csv;charset=utf-8');
   });
   let resetArmed = false;
@@ -653,8 +652,8 @@ tfoot td{font-weight:700;background:var(--soft)}
   });
 
   // ---------- 입력 폼 ----------
-  const FIELDS = {iDate:'date',iCode:'code',iPart:'part',iColor:'color',iPack:'packDate',iQty:'qty',iDef:'defects',iReuse:'reuse',iTop:'top',iBottom:'bottom',iBoth:'both',iOther:'other',iNote:'note'};
-  const NUMS = ['qty','defects','reuse','top','bottom','both','other'];
+  const FIELDS = {iDate:'date',iCode:'code',iPart:'part',iColor:'color',iPack:'packDate',iQty:'qty',iDef:'defects',iReuse:'reuse',iTop:'top',iBottom:'bottom',iBoth:'both',iNote:'note'};
+  const NUMS = ['qty','defects','reuse','top','bottom','both'];
   const msg = (t, cls) => { $('formMsg').textContent = t; $('formMsg').className = 'formmsg ' + (cls||''); };
   function openForm(r){
     editingId = r ? r._id : null; $('pricePanel').hidden = true;
@@ -672,7 +671,7 @@ tfoot td{font-weight:700;background:var(--soft)}
     if (!d.date || !d.code || !d.part) return msg('검사일, 제품코드, 부품명은 꼭 입력해야 합니다.', 'err');
     if (!(d.qty > 0)) return msg('검사수량은 1 이상이어야 합니다.', 'err');
     if (NUMS.some(k => !Number.isFinite(d[k]) || d[k] < 0)) return msg('수량 칸에는 0 이상의 숫자만 입력하세요.', 'err');
-    const typed = d.top + d.bottom + d.both + d.other;
+    const typed = d.top + d.bottom + d.both;
     if (!d.defects && typed) d.defects = typed;
     if (d.defects > d.qty) return msg('총 불량수가 검사수량보다 많습니다. 값을 확인하세요.', 'err');
     if (d.reuse > d.defects) return msg('재사용 수가 총 불량수보다 많습니다. 값을 확인하세요.', 'err');
@@ -680,10 +679,10 @@ tfoot td{font-weight:700;background:var(--soft)}
     if (editingId) rows = rows.map(r => r._id === editingId ? {...r, ...d} : r);
     else rows.push({...d, _id:'l' + Date.now().toString(36), seq:Date.now(), createdAt:d.updatedAt});
     persist();
-    const warn = typed && typed !== d.defects ? ` (참고: 유형 합계 ${typed}와 총 불량 ${d.defects}이 다릅니다)` : '';
+    const warn = typed > d.defects ? ` (참고: 이물질 합계 ${typed}가 총 불량 ${d.defects}보다 많습니다)` : '';
     const wasEdit = !!editingId; editingId = null;
     msg((wasEdit ? '수정했습니다.' : '저장했습니다. 다음 기록을 이어서 입력할 수 있습니다.') + warn, warn ? 'warn' : 'ok');
-    if (!wasEdit){ ['iQty','iDef','iReuse','iTop','iBottom','iBoth','iOther','iNote'].forEach(id => $(id).value=''); $('iCode').select(); }
+    if (!wasEdit){ ['iQty','iDef','iReuse','iTop','iBottom','iBoth','iNote'].forEach(id => $(id).value=''); $('iCode').select(); }
     else setTimeout(() => { $('formPanel').hidden = true; }, 700);
   });
 
