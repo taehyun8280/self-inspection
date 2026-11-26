@@ -230,8 +230,8 @@ tfoot td{font-weight:700;background:var(--soft)}
         <div class="field"><label for="iQty">검사수량 *</label><input type="number" id="iQty" min="1" inputmode="numeric" required></div>
         <div class="field"><label for="iDef">총 불량수</label><input type="number" id="iDef" min="0" inputmode="numeric"></div>
         <div class="field"><label for="iReuse">재사용</label><input type="number" id="iReuse" min="0" inputmode="numeric"></div>
-        <div class="field"><label for="iScrap">폐기</label><input type="number" id="iScrap" min="0" inputmode="numeric"></div>
         <div class="field w2"><label for="iNote">비고</label><input id="iNote" autocomplete="off"></div>
+        <div class="field"></div>
         <div class="fgroup">불량 유형</div>
         <div class="field"><label for="iTop">이물질 · 윗면</label><input type="number" id="iTop" min="0" inputmode="numeric"></div>
         <div class="field"><label for="iBottom">이물질 · 아랫면</label><input type="number" id="iBottom" min="0" inputmode="numeric"></div>
@@ -295,7 +295,7 @@ tfoot td{font-weight:700;background:var(--soft)}
   const fmtD = d => d ? d.slice(2).replace(/-/g,'.') : '';
   const level = r => r >= 0.10 ? 'crit' : r >= 0.05 ? 'warn' : 'ok';
   const levelTxt = {ok:'양호',warn:'주의',crit:'경고'};
-  const scrapOf = r => (r.scrap !== undefined && r.scrap !== null && r.scrap !== '') ? n(r.scrap) : Math.max(0, n(r.defects) - n(r.reuse));
+  const scrapOf = r => Math.max(0, n(r.defects) - n(r.reuse));
 
   let rows = [], prices = {}, editingId = null, armedDelete = null;
   // 단가는 제품코드·색상·부품이 모두 같은 품목에만 적용
@@ -436,7 +436,7 @@ tfoot td{font-weight:700;background:var(--soft)}
   function sums(list){
     const s = {qty:0,def:0,reuse:0,scrap:0,top:0,bottom:0,both:0,other:0,reuseAmt:0,scrapAmt:0,noPrice:new Set()};
     list.forEach(r => { s.qty+=n(r.qty); s.def+=n(r.defects); s.reuse+=n(r.reuse); s.scrap+=scrapOf(r); s.top+=n(r.top); s.bottom+=n(r.bottom); s.both+=n(r.both); s.other+=n(r.other);
-      const p = priceOf(r); if (p > 0){ s.reuseAmt += n(r.reuse)*p; s.scrapAmt += scrapOf(r)*p; } else if (n(r.defects) || scrapOf(r)) s.noPrice.add(pkey(r)); });
+      const p = priceOf(r); if (p > 0){ s.reuseAmt += n(r.reuse)*p; s.scrapAmt += scrapOf(r)*p; } else if (n(r.defects)) s.noPrice.add(pkey(r)); });
     return s;
   }
 
@@ -652,14 +652,13 @@ tfoot td{font-weight:700;background:var(--soft)}
   });
 
   // ---------- 입력 폼 ----------
-  const FIELDS = {iDate:'date',iCode:'code',iPart:'part',iColor:'color',iPack:'packDate',iQty:'qty',iDef:'defects',iReuse:'reuse',iScrap:'scrap',iTop:'top',iBottom:'bottom',iBoth:'both',iNote:'note'};
-  const NUMS = ['qty','defects','reuse','scrap','top','bottom','both'];
+  const FIELDS = {iDate:'date',iCode:'code',iPart:'part',iColor:'color',iPack:'packDate',iQty:'qty',iDef:'defects',iReuse:'reuse',iTop:'top',iBottom:'bottom',iBoth:'both',iNote:'note'};
+  const NUMS = ['qty','defects','reuse','top','bottom','both'];
   const msg = (t, cls) => { $('formMsg').textContent = t; $('formMsg').className = 'formmsg ' + (cls||''); };
   function openForm(r){
     editingId = r ? r._id : null; $('pricePanel').hidden = true;
     $('formTitle').textContent = r ? '검사 기록 수정' : '검사 기록 추가';
     Object.entries(FIELDS).forEach(([id,k]) => { $(id).value = r ? (r[k] ?? '') : ''; });
-    if (r) $('iScrap').value = scrapOf(r);
     if (!r) $('iDate').value = latestDate() || ymd(new Date());
     msg(''); $('formPanel').hidden = false; $('iCode').focus();
     $('formPanel').scrollIntoView({block:'nearest', behavior:'smooth'});
@@ -683,7 +682,7 @@ tfoot td{font-weight:700;background:var(--soft)}
     const warn = typed > d.defects ? ` (참고: 이물질 합계 ${typed}가 총 불량 ${d.defects}보다 많습니다)` : '';
     const wasEdit = !!editingId; editingId = null;
     msg((wasEdit ? '수정했습니다.' : '저장했습니다. 다음 기록을 이어서 입력할 수 있습니다.') + warn, warn ? 'warn' : 'ok');
-    if (!wasEdit){ ['iQty','iDef','iReuse','iScrap','iTop','iBottom','iBoth','iNote'].forEach(id => $(id).value=''); $('iCode').select(); }
+    if (!wasEdit){ ['iQty','iDef','iReuse','iTop','iBottom','iBoth','iNote'].forEach(id => $(id).value=''); $('iCode').select(); }
     else setTimeout(() => { $('formPanel').hidden = true; }, 700);
   });
 
